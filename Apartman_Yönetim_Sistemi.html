@@ -1864,10 +1864,9 @@
 
         function kullaniciBilgisiGonderSor(adSoyad, telefon, daire, sifre) {
             let aptAd = aptBilgi.ad || 'Apartman';
-            let url   = window.location.href.split('?')[0];
             _bekleyenKullaniciBilgisi = {
                 telefon,
-                mesaj: `Sayın ${adSoyad},\n\n${aptAd} - ${daire} apartman yönetim sistemine erişim bilgileriniz:\n\n🔗 Giriş: ${url}\n👤 Kullanıcı Adı: ${telefon}\n🔑 Şifre: ${sifre}\n\nSaygılarımızla,\nApartman Yönetimi`
+                mesaj: `Sayın ${adSoyad},\n\n${aptAd} - ${daire} apartman yönetim sistemine erişim bilgileriniz:\n\n🔗 Giriş: https://terdogan22.github.io/lider/\n👤 Kullanıcı Adı: ${telefon}\n🔑 Şifre: ${sifre}\n\nSaygılarımızla,\nApartman Yönetimi`
             };
             document.getElementById('onayIkon').textContent    = '📲';
             document.getElementById('onayBaslik').textContent  = 'Giriş Bilgilerini Gönder';
