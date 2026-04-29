@@ -30,3 +30,30 @@ for update
 to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+-- ── SAKİN GİRİŞİ İÇİN PAYLAŞILAN VERİ TABLOSU ────────────────────────
+-- Sakinlerin kendi cihazlarından giriş yapabilmesi için gereklidir.
+-- Yöneticiye ait app_state verisi burada halka açık olarak yayınlanır.
+-- Şifreler SHA-256 hash olarak saklanır, ham şifre tutulmaz.
+
+create table if not exists public.shared_data (
+    id integer primary key default 1,
+    payload jsonb not null default '{}'::jsonb,
+    updated_at timestamptz not null default now(),
+    constraint shared_data_tek_satir check (id = 1)
+);
+
+alter table public.shared_data enable row level security;
+
+drop policy if exists "Public read shared data" on public.shared_data;
+create policy "Public read shared data"
+on public.shared_data for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Authenticated write shared data" on public.shared_data;
+create policy "Authenticated write shared data"
+on public.shared_data for all
+to authenticated
+using (true)
+with check (true);

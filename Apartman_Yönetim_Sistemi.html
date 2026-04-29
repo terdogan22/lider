@@ -692,8 +692,8 @@
             </div>
             <div class="auth-form">
                 <div>
-                    <label>E-posta</label>
-                    <input type="email" id="girisEposta" placeholder="ornek@site.com" autocomplete="username">
+                    <label>E-posta veya Telefon</label>
+                    <input type="text" id="girisEposta" placeholder="ornek@site.com veya 05xxxxxxxxx" autocomplete="username">
                 </div>
                 <div>
                     <label>Şifre</label>
@@ -701,6 +701,38 @@
                 </div>
                 <div id="authDurum" class="durum-etiketi durum-bilgi">Supabase bağlantısı hazırlanıyor...</div>
                 <button class="btn-koyu-mavi" onclick="girisYap()">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAKİN GÖRÜNÜM PANELİ -->
+    <div id="sakinGorunumPaneli" class="hidden no-print" style="min-height:100vh;background:#f0f4f8;padding:24px 12px;">
+        <div style="max-width:520px;margin:0 auto;">
+            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:18px;padding:22px 24px;color:white;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:11px;opacity:.75;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">🏢 Apartman</div>
+                    <div id="sakinAptAd" style="font-size:20px;font-weight:800;letter-spacing:.02em;">---</div>
+                </div>
+                <button onclick="sakinCikis()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Çıkış</button>
+            </div>
+            <div style="background:white;border-radius:14px;padding:18px 20px;margin-bottom:14px;border:1px solid #e2e8f0;">
+                <div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">👤 Hesap Bilgileri</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><span style="font-size:11px;color:#94a3b8;">Ad Soyad</span><div id="sakinAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
+                    <div><span style="font-size:11px;color:#94a3b8;">Daire / Bölüm</span><div id="sakinDaireAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
+                    <div><span style="font-size:11px;color:#94a3b8;">Telefon</span><div id="sakinTelAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
+                    <div><span style="font-size:11px;color:#94a3b8;">Toplam Borç</span><div id="sakinToplamBorc" style="font-weight:800;color:#dc2626;font-size:16px;">---</div></div>
+                </div>
+            </div>
+            <div style="background:white;border-radius:14px;padding:18px 20px;border:1px solid #e2e8f0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">📊 Aidat Durumu</div>
+                    <select id="sakinYilSecimi" onchange="sakinAidatGuncelle()" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:4px 10px;background:#eff6ff;cursor:pointer;"></select>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px;padding:0 2px;">
+                    <span>Aylık aidat: <b id="sakinAylikAidat" style="color:#1e40af;">---</b></span>
+                </div>
+                <div id="sakinAidatListesi" style="display:grid;gap:6px;"></div>
             </div>
         </div>
     </div>
@@ -1467,6 +1499,19 @@
                 updated_at: new Date(guncellemeZamani).toISOString()
             }, { onConflict: 'user_id' });
             if (error) throw error;
+            // Sakinlerin kendi cihazlarından giriş yapabilmesi için shared_data'ya yaz
+            let sakinPayload = {
+                aptBilgi: payload.aptBilgi,
+                daireListesi: payload.daireListesi,
+                islemler: payload.islemler,
+                aidatAyarlari: payload.aidatAyarlari,
+                manuelYillar: payload.manuelYillar,
+                kullaniciKayitlari: payload.kullaniciKayitlari
+            };
+            await _supabase.from('shared_data').upsert(
+                { id: 1, payload: sakinPayload, updated_at: new Date(guncellemeZamani).toISOString() },
+                { onConflict: 'id' }
+            );
             senkronDurumunuGuncelle('Bulut senkron tamam', 'basari');
         }
 
@@ -1570,17 +1615,114 @@
 
         async function girisYap() {
             if (!_supabase) return;
-            let email = document.getElementById('girisEposta').value.trim();
+            let kullanici = document.getElementById('girisEposta').value.trim();
             let password = document.getElementById('girisSifre').value;
-            if (!email || !password) return authDurumunuGuncelle('E-posta ve şifre girin.', 'hata');
+            if (!kullanici || !password) return authDurumunuGuncelle('Kullanıcı adı ve şifre girin.', 'hata');
+            // Telefon numarası mı? (@ içermiyorsa ve rakam ağırlıklıysa sakin girişi)
+            let rakamSayisi = (kullanici.replace(/\D/g, '')).length;
+            if (!kullanici.includes('@') && rakamSayisi >= 10) {
+                await sakinGirisYap(kullanici, password);
+                return;
+            }
+            // Yönetici girişi (Supabase)
             authDurumunuGuncelle('Giriş yapılıyor...', 'bekliyor');
-            let { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            let { data, error } = await _supabase.auth.signInWithPassword({ email: kullanici, password });
             if (error) return authDurumunuGuncelle('Giriş başarısız: ' + error.message, 'hata');
             authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
             if (data?.session) {
                 await oturumuHazirla(data.session);
             }
         }
+
+        // ── SAKİN GİRİŞ SİSTEMİ ─────────────────────────────────────────
+        let _sakinOturumu = null;
+
+        async function sakinGirisYap(telefonHam, sifre) {
+            authDurumunuGuncelle('Giriş yapılıyor...', 'bekliyor');
+            let telefon = telefonuNormalizeEt(telefonHam);
+            // shared_data'dan veri çek (public erişim, auth gerekmez)
+            let { data, error } = await _supabase.from('shared_data').select('payload').eq('id', 1).maybeSingle();
+            if (error || !data?.payload) {
+                authDurumunuGuncelle('Veriler yüklenemedi. Yönetici henüz senkron yapmamış olabilir.', 'hata');
+                return;
+            }
+            let liste = data.payload.kullaniciKayitlari || [];
+            let hesap = liste.find(k => k.telefon === telefon);
+            if (!hesap) {
+                authDurumunuGuncelle('Bu telefon numarasına kayıtlı kullanıcı bulunamadı.', 'hata');
+                return;
+            }
+            let sifreOzeti = await sifreyiOzetle(sifre);
+            if (sifreOzeti !== hesap.sifreOzeti) {
+                authDurumunuGuncelle('Şifre hatalı.', 'hata');
+                return;
+            }
+            _sakinOturumu = { hesap, veri: data.payload };
+            sakinPaneliniGoster();
+        }
+
+        function sakinPaneliniGoster() {
+            if (!_sakinOturumu) return;
+            let { hesap, veri } = _sakinOturumu;
+            document.getElementById('authPaneli').classList.add('hidden');
+            document.getElementById('sakinGorunumPaneli').classList.remove('hidden');
+            document.getElementById('sakinAptAd').textContent  = veri.aptBilgi?.ad || 'Apartman';
+            document.getElementById('sakinAd').textContent     = hesap.adSoyad || '-';
+            document.getElementById('sakinDaireAd').textContent = hesap.daire || '-';
+            document.getElementById('sakinTelAd').textContent  = hesap.telefon || '-';
+            // Yıl seçimi
+            let yilSec = document.getElementById('sakinYilSecimi');
+            let yillar = veri.manuelYillar?.length ? veri.manuelYillar : [new Date().getFullYear()];
+            yilSec.innerHTML = [...yillar].sort((a,b)=>b-a).map(y => `<option value="${y}">${y}</option>`).join('');
+            sakinAidatGuncelle();
+        }
+
+        function sakinAidatGuncelle() {
+            if (!_sakinOturumu) return;
+            let { hesap, veri } = _sakinOturumu;
+            let yil = parseInt(document.getElementById('sakinYilSecimi').value);
+            let ayarlar = (veri.aidatAyarlari || {})[yil] || {};
+            let aylik = ayarlar[hesap.daire] || 0;
+            document.getElementById('sakinAylikAidat').textContent = aylik ? aylik.toLocaleString('tr-TR') + ' TL' : 'Tanımsız';
+            let simdi = new Date(), sYil = simdi.getFullYear(), sAy = simdi.getMonth();
+            let toplamBorc = 0;
+            let _aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+            let html = _aylar.map((ay, idx) => {
+                let gelecek = yil > sYil || (yil === sYil && idx > sAy);
+                if (aylik === 0) {
+                    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;">
+                        <span style="font-weight:600;color:#334155;">${ay}</span>
+                        <span style="font-size:12px;color:#94a3b8;">Aidat tanımsız</span></div>`;
+                }
+                let kalem = ay + ' Aidatı';
+                let odenen = (veri.islemler || []).filter(i => i.yil===yil && i.detay===hesap.daire && i.ay===kalem).reduce((s,i)=>s+i.tutar,0);
+                let borc = Math.max(0, aylik - odenen);
+                if (!gelecek) toplamBorc += borc;
+                let renk   = gelecek ? '#f8fafc' : (borc === 0 ? '#f0fdf4' : '#fff7f7');
+                let border = gelecek ? '#e2e8f0' : (borc === 0 ? '#bbf7d0' : '#fecaca');
+                let etiket = gelecek
+                    ? `<span style="font-size:12px;color:#94a3b8;">Henüz gelmedi</span>`
+                    : borc === 0
+                        ? `<span style="font-size:12px;color:#16a34a;font-weight:700;">✅ Ödendi</span>`
+                        : `<span style="font-size:13px;color:#dc2626;font-weight:800;">${borc.toLocaleString('tr-TR')} TL borç</span>`;
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:${renk};border:1px solid ${border};">
+                    <span style="font-weight:600;color:#334155;">${ay}</span>${etiket}</div>`;
+            }).join('');
+            document.getElementById('sakinAidatListesi').innerHTML = html;
+            document.getElementById('sakinToplamBorc').textContent = toplamBorc > 0
+                ? toplamBorc.toLocaleString('tr-TR', {minimumFractionDigits:2}) + ' TL'
+                : '✅ Borç yok';
+        }
+
+        function sakinCikis() {
+            _sakinOturumu = null;
+            document.getElementById('sakinGorunumPaneli').classList.add('hidden');
+            document.getElementById('authPaneli').classList.remove('hidden');
+            document.getElementById('girisEposta').value = '';
+            document.getElementById('girisSifre').value = '';
+            authDurumunuGuncelle('Çıkış yapıldı.', 'bilgi');
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         async function hesapOlustur() {
             if (!_supabase) return;
@@ -2848,6 +2990,7 @@
                 ekButceAyarlari,
                 manuelYillar,
                 sakinBilgileri,
+                kullaniciKayitlari,
                 smsAyarlari: {
                     apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
                     apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
@@ -2866,6 +3009,7 @@
             localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(veri.ekButceAyarlari || {}));
             localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
             localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
+            localStorage.setItem('apartmanKullanicilari', JSON.stringify(veri.kullaniciKayitlari || []));
 
             let smsAyarlari = veri.smsAyarlari || {};
             if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId);
