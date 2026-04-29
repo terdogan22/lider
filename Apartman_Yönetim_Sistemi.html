@@ -1255,6 +1255,29 @@
             }
         }
 
+        async function yenidenDeneyerekCalistir(islem, secenek = {}) {
+            let {
+                denemeSayisi = 2,
+                beklemeMs = 2500,
+                durumMesaji = ''
+            } = secenek;
+
+            let sonHata;
+            for (let i = 0; i < denemeSayisi; i++) {
+                try {
+                    if (i > 0 && durumMesaji) {
+                        senkronDurumunuGuncelle(durumMesaji + ` (${i + 1}. deneme)`, 'bekliyor');
+                    }
+                    return await islem();
+                } catch (e) {
+                    sonHata = e;
+                    if (i === denemeSayisi - 1) break;
+                    await new Promise(resolve => setTimeout(resolve, beklemeMs));
+                }
+            }
+            throw sonHata;
+        }
+
         function uygulamaVerisiDegisti(key) {
             if (_depoyaYazimAskida || !_uygulamaHazir) return;
             if (key !== '*' && !UYGULAMA_LOCAL_KEYS.includes(key)) return;
@@ -1311,10 +1334,13 @@
             if (!_supabase || !_oturum) return;
             let yerelZaman = yerelVeriZamaniniOku();
             senkronDurumunuGuncelle('Bulut verisi kontrol ediliyor...', 'bekliyor');
-            let { data, error } = await zamanAsimliCalistir(
-                _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle(),
-                12000,
-                'Supabase yanıt vermedi'
+            let { data, error } = await yenidenDeneyerekCalistir(
+                () => zamanAsimliCalistir(
+                    _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle(),
+                    45000,
+                    'Supabase yanıt vermedi'
+                ),
+                { denemeSayisi: 2, beklemeMs: 3000, durumMesaji: 'Supabase projesi uyanıyor olabilir, tekrar deneniyor' }
             );
             if (error) throw error;
             let uzakZaman = data?.updated_at ? new Date(data.updated_at).getTime() : 0;
@@ -1330,7 +1356,10 @@
                 verileriYukle();
             }
             if (uygulamaVerisiVarMi()) {
-                await zamanAsimliCalistir(uzakDurumuKaydet(), 12000, 'Buluta yazma zaman aşımına uğradı');
+                await yenidenDeneyerekCalistir(
+                    () => zamanAsimliCalistir(uzakDurumuKaydet(), 45000, 'Buluta yazma zaman aşımına uğradı'),
+                    { denemeSayisi: 2, beklemeMs: 3000, durumMesaji: 'Buluta yazma tekrar deneniyor' }
+                );
             }
         }
 
