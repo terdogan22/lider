@@ -992,7 +992,10 @@
     <div id="kullaniciYonetimPaneli" class="container hidden">
         <div class="panel-header no-print">
             <h2>🔐 Yönetici Paneli</h2>
-            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+            <div class="btn-grup">
+                <button onclick="sistemiSifirla()" class="btn-danger" style="width:auto;">🗑️ Verileri Sil</button>
+                <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+            </div>
         </div>
         <div class="no-print giris-formu">
             <div class="row">
@@ -1005,15 +1008,6 @@
             <input type="hidden" id="kullaniciDuzenleId">
         </div>
         <div id="kullaniciListeAlani"></div>
-        <div class="kart no-print" style="margin-top:20px; border:1px solid #fecaca; background:#fff5f5;">
-            <div style="display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap;">
-                <div>
-                    <strong style="display:block; color:#b91c1c;">Tehlikeli İşlem</strong>
-                    <span style="color:#7f1d1d; font-size:13px;">Tüm apartman verilerini kalıcı olarak siler.</span>
-                </div>
-                <button onclick="sistemiSifirla()" class="btn-danger" style="width:auto;">🗑️ Verileri Sil</button>
-            </div>
-        </div>
     </div>
 
     <div id="yoneticiPaneli" class="container hidden">
