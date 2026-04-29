@@ -1093,7 +1093,7 @@
         </div>
         <div class="no-print giris-formu">
             <div class="row">
-                <div class="col"><label>Bölüm:</label><select id="kullaniciDaireSecimi"></select></div>
+                <div class="col"><label>Bölüm:</label><select id="kullaniciDaireSecimi" onchange="kullaniciDaireSecildi()"></select></div>
                 <div class="col"><label>Ad Soyad:</label><input type="text" id="kullaniciAdSoyad" placeholder="Sakin adı"></div>
                 <div class="col"><label>Telefon (Kullanıcı Adı):</label><input type="text" id="kullaniciTelefon" placeholder="05xxxxxxxxx"></div>
                 <div class="col"><label>Şifre:</label><input type="password" id="kullaniciSifre" placeholder="Şifre belirleyin"></div>
@@ -1760,6 +1760,21 @@
             document.getElementById('kullaniciSifre').value = '';
             if (daireListesi.length > 0) {
                 document.getElementById('kullaniciDaireSecimi').value = daireListesi[0];
+            }
+        }
+
+        function kullaniciDaireSecildi() {
+            // Sadece yeni kullanıcı ekleme modunda (düzenleme değilse) otomatik doldur
+            let duzenleId = document.getElementById('kullaniciDuzenleId').value;
+            if (duzenleId) return;
+            let daire = document.getElementById('kullaniciDaireSecimi').value;
+            let sakin = sakinBilgileri[daire];
+            if (sakin) {
+                if (sakin.ad) document.getElementById('kullaniciAdSoyad').value = sakin.ad;
+                if (sakin.tel) document.getElementById('kullaniciTelefon').value = sakin.tel;
+            } else {
+                document.getElementById('kullaniciAdSoyad').value = '';
+                document.getElementById('kullaniciTelefon').value = '';
             }
         }
 
