@@ -32,7 +32,10 @@
         *, *::before, *::after { box-sizing: border-box; }
         body {
             font-family: 'Inter', Arial, sans-serif;
-            background: var(--arkaplan);
+            background:
+                radial-gradient(circle at top left, rgba(59,130,246,.10), transparent 24%),
+                radial-gradient(circle at top right, rgba(22,163,74,.08), transparent 22%),
+                linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
             margin: 0; padding: 24px 20px;
             color: var(--metin);
             font-size: 14px;
@@ -45,6 +48,8 @@
             box-shadow: var(--golge);
             max-width: 1240px;
             margin: auto;
+            border: 1px solid rgba(226,232,240,.95);
+            backdrop-filter: blur(6px);
         }
         .hidden { display: none !important; }
 
@@ -140,25 +145,62 @@
         .ana-header-aksiyonlar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .ana-header-aksiyonlar button { width: auto; padding: 9px 14px; font-size: 13px; }
 
-        .menu-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 24px; }
+        .menu-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 24px; }
         .menu-karti {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
             color: white;
-            padding: 28px 20px;
-            border-radius: 14px;
-            text-align: center;
-            width: 220px;
-            box-shadow: 0 4px 12px rgba(30,64,175,.25);
-            transition: transform .2s, box-shadow .2s;
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 1.4;
+            padding: 22px 20px 20px;
+            border-radius: 18px;
+            text-align: left;
+            width: 230px;
+            min-height: 148px;
+            box-shadow: 0 12px 28px rgba(30,64,175,.18);
+            transition: transform .2s, box-shadow .2s, filter .2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.18);
         }
-        .menu-karti:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,64,175,.35); }
-        .menu-karti[style*="#17a2b8"] { background: linear-gradient(135deg, #0891b2, #0e7490) !important; box-shadow: 0 4px 12px rgba(8,145,178,.25); }
-        .menu-karti[style*="#17a2b8"]:hover { box-shadow: 0 8px 24px rgba(8,145,178,.35) !important; }
-        .menu-karti[style*="#6f42c1"] { background: linear-gradient(135deg, #7c3aed, #5b21b6) !important; box-shadow: 0 4px 12px rgba(124,58,237,.25); }
-        .menu-karti[style*="#6f42c1"]:hover { box-shadow: 0 8px 24px rgba(124,58,237,.35) !important; }
+        .menu-karti::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top right, rgba(255,255,255,.22), transparent 30%),
+                linear-gradient(180deg, rgba(255,255,255,.08), transparent 60%);
+            pointer-events: none;
+        }
+        .menu-karti:hover { transform: translateY(-6px); box-shadow: 0 18px 34px rgba(30,64,175,.24); filter: saturate(1.05); }
+        .menu-karti-baslik {
+            display: block;
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .menu-karti-aciklama {
+            display: block;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255,255,255,.88);
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        .menu-karti-finans { background: linear-gradient(145deg, #1d4ed8, #1e3a8a); }
+        .menu-karti-finans:hover { box-shadow: 0 18px 34px rgba(30,64,175,.24); }
+        .menu-karti-sakin { background: linear-gradient(145deg, #0f766e, #115e59); }
+        .menu-karti-sakin:hover { box-shadow: 0 18px 34px rgba(15,118,110,.24); }
+        .menu-karti-ayar { background: linear-gradient(145deg, #b45309, #92400e); }
+        .menu-karti-ayar:hover { box-shadow: 0 18px 34px rgba(180,83,9,.24); }
+        .menu-karti-ozel { background: linear-gradient(145deg, #7c3aed, #5b21b6); }
+        .menu-karti-ozel:hover { box-shadow: 0 18px 34px rgba(124,58,237,.24); }
+        .menu-karti-bilgi { background: linear-gradient(145deg, #0284c7, #075985); }
+        .menu-karti-bilgi:hover { box-shadow: 0 18px 34px rgba(2,132,199,.24); }
 
         /* ── TABLOLAR ────────────────────────────────────────────────── */
         .matris-tablo { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12.5px; text-align: center; }
@@ -931,13 +973,34 @@
             </div>
         </div>
         <div class="menu-grid" id="dinamikMenuKutusu">
-            <button class="menu-karti" style="background-color: #17a2b8;" onclick="ekranDegistir('apartmanDetayPaneli')">🏢 Apartman Bilgileri</button>
-            <button class="menu-karti" onclick="ekranDegistir('sakinBilgileriPaneli')">👥 Sakin Bilgileri</button>
-            <button class="menu-karti" onclick="ekranDegistir('yoneticiPaneli')">📘 İşletme Defteri</button>
-            <button class="menu-karti" onclick="ekranDegistir('aidatTakibiPaneli')">📅 Aidat Takibi</button>
-            <button class="menu-karti" onclick="ekranDegistir('aidatAyarlariPaneli')">⚙️ Bina & Aidat Ayarları</button>
-            <button class="menu-karti" style="background-color: #6f42c1;" onclick="modalAc('modalYeniYil')">📅 Yeni Yıl Aç</button>
-            <button class="menu-karti" onclick="modalAc('modalEkButce')" id="btnEkButceEkle">➕ Ek Bütçe Ekle</button>
+            <button class="menu-karti menu-karti-bilgi" onclick="ekranDegistir('apartmanDetayPaneli')">
+                <span class="menu-karti-baslik">🏢 Apartman Bilgileri</span>
+                <span class="menu-karti-aciklama">Kimlik, yönetici, banka ve adres bilgilerini tek yerde görüntüleyin.</span>
+            </button>
+            <button class="menu-karti menu-karti-sakin" onclick="ekranDegistir('sakinBilgileriPaneli')">
+                <span class="menu-karti-baslik">👥 Sakin Bilgileri</span>
+                <span class="menu-karti-aciklama">Daire sakinlerinin telefon, e-posta ve iletişim kayıtlarını yönetin.</span>
+            </button>
+            <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('yoneticiPaneli')">
+                <span class="menu-karti-baslik">📘 İşletme Defteri</span>
+                <span class="menu-karti-aciklama">Gelir ve gider hareketlerini kaydedin, yazdırın ve dışa aktarın.</span>
+            </button>
+            <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('aidatTakibiPaneli')">
+                <span class="menu-karti-baslik">📅 Aidat Takibi</span>
+                <span class="menu-karti-aciklama">Borç durumu, ödeme geçmişi ve aidat matrisini hızlıca takip edin.</span>
+            </button>
+            <button class="menu-karti menu-karti-ayar" onclick="ekranDegistir('aidatAyarlariPaneli')">
+                <span class="menu-karti-baslik">⚙️ Bina ve Aidat Ayarları</span>
+                <span class="menu-karti-aciklama">Daire bazlı aidat tutarlarını ve temel yapı ayarlarını güncelleyin.</span>
+            </button>
+            <button class="menu-karti menu-karti-ozel" onclick="modalAc('modalYeniYil')">
+                <span class="menu-karti-baslik">🗓️ Yeni Yıl Aç</span>
+                <span class="menu-karti-aciklama">Yeni dönem için kayıt yapısını hazırlayıp takibi yeni yıla taşıyın.</span>
+            </button>
+            <button class="menu-karti menu-karti-ayar" onclick="modalAc('modalEkButce')" id="btnEkButceEkle">
+                <span class="menu-karti-baslik">➕ Ek Bütçe Ekle</span>
+                <span class="menu-karti-aciklama">Taksitli ya da özel gider kalemleri için ek bütçe planı oluşturun.</span>
+            </button>
         </div>
     </div>
 
@@ -2018,8 +2081,11 @@
             document.querySelectorAll('.dinamik-btn').forEach(b => b.remove());
             Object.keys(ekButceAyarlari).forEach(ad => {
                 let btn = document.createElement('button');
-                btn.className = "menu-karti dinamik-btn";
-                btn.innerText = "📋 " + ad;
+                btn.className = "menu-karti menu-karti-ozel dinamik-btn";
+                btn.innerHTML = `
+                    <span class="menu-karti-baslik">📋 ${ad}</span>
+                    <span class="menu-karti-aciklama">Ek bütçe planını görüntüleyin, taksitleri yönetin ve hareketleri takip edin.</span>
+                `;
                 btn.onclick = () => { aktifEkButceAdi = ad; ekranDegistir('ekButcePaneli'); };
                 document.getElementById('dinamikMenuKutusu').insertBefore(btn, document.getElementById('btnEkButceEkle'));
             });
