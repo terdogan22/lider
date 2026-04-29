@@ -741,6 +741,30 @@
     <div id="toastKap"></div>
 
     <!-- İŞLEM DÜZENLEME MODALİ -->
+    <!-- GELİR / GİDER GİRİŞ MODALİ -->
+    <div id="modalGelirGider" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>➕ Gelir / Gider Ekle</h3>
+            <div class="row">
+                <div class="col" style="min-width:120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
+                <div class="col" style="min-width:80px;"><label>Tür:</label><select id="islemTuru" onchange="formuDuzenle()"><option value="Gelir">Gelir</option><option value="Gider">Gider</option></select></div>
+            </div>
+            <div class="row">
+                <div class="col" id="daireKutusu"><label>Bölüm:</label><select id="ilgiliDaire"></select></div>
+                <div class="col" id="ayKutusu"><label>Kalem:</label><select id="ilgiliAySecimi"></select></div>
+                <div class="col hidden" id="giderTuruKutusu"><label>Gider Türü:</label><select id="giderTuruSecimi"></select></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>Tutar (TL):</label><input type="number" id="islemTutari" min="0" placeholder="0"></div>
+                <div class="col"><label>Açıklama:</label><input type="text" id="islemAciklamasi" placeholder="İsteğe bağlı"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button class="btn-geri" style="flex:1;" onclick="modalKapat('modalGelirGider')">İptal</button>
+                <button class="btn-success" style="flex:2;" onclick="islemEkle()">➕ Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalIslemDuzenle" class="modal-arkaplan hidden no-print">
         <div class="modal-kutu">
             <h3>✎ İşlemi Düzenle</h3>
@@ -1042,9 +1066,13 @@
                 <span class="menu-karti-baslik">👥 Sakin Bilgileri</span>
                 <span class="menu-karti-aciklama">Daire sakinlerinin telefon, e-posta ve iletişim kayıtlarını yönetin.</span>
             </button>
+            <button class="menu-karti menu-karti-finans" onclick="gelirGiderModalAc()">
+                <span class="menu-karti-baslik">➕ Gelir / Gider Ekle</span>
+                <span class="menu-karti-aciklama">Yeni gelir veya gider hareketi girin.</span>
+            </button>
             <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('yoneticiPaneli')">
                 <span class="menu-karti-baslik">📘 İşletme Defteri</span>
-                <span class="menu-karti-aciklama">Gelir ve gider hareketlerini kaydedin, yazdırın ve dışa aktarın.</span>
+                <span class="menu-karti-aciklama">Tüm gelir ve gider hareketlerini görüntüleyin, yazdırın ve dışa aktarın.</span>
             </button>
             <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('aidatTakibiPaneli')">
                 <span class="menu-karti-baslik">📅 Aidat Takibi</span>
@@ -1142,6 +1170,7 @@
         <div class="yil-paneli no-print">
             <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:130px;"></select>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button onclick="gelirGiderModalAc()" class="btn-success" style="width:auto;">➕ Gelir / Gider Ekle</button>
                 <button onclick="document.getElementById('bankaEkstresiDosyasi').click()" class="btn-koyu-mavi" style="width:auto;">TEB Ekstre Yükle</button>
                 <button onclick="topluOdemeModalAc()" class="btn-success" style="width:auto;">💰 Toplu Ödeme</button>
                 <button onclick="araDonemiModalAc()" class="btn-success" style="width:auto;">📅 Ara Dönem</button>
@@ -1150,18 +1179,6 @@
             </div>
         </div>
         <input type="file" id="bankaEkstresiDosyasi" accept=".xls,.xlsx,.xlsm,.htm,.html" style="display:none;" onchange="bankaEkstresiSecildi(event)">
-        <div class="no-print giris-formu">
-            <div class="row">
-                <div class="col" style="min-width: 120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
-                <div class="col" style="min-width: 80px;"><label>Tür:</label><select id="islemTuru" onchange="formuDuzenle()"><option value="Gelir">Gelir</option><option value="Gider">Gider</option></select></div>
-                <div class="col" id="daireKutusu"><label>Bölüm:</label><select id="ilgiliDaire"></select></div>
-                <div class="col" id="ayKutusu"><label>Kalem:</label><select id="ilgiliAySecimi"></select></div>
-                <div class="col hidden" id="giderTuruKutusu"><label>Gider Türü:</label><select id="giderTuruSecimi"></select></div>
-                <div class="col"><label>Tutar:</label><input type="number" id="islemTutari"></div>
-                <div class="col"><label>Açıklama:</label><input type="text" id="islemAciklamasi"></div>
-                <div class="col"><label>&nbsp;</label><button class="btn-success" onclick="islemEkle()">➕ Ekle</button></div>
-            </div>
-        </div>
         <div class="arama-bar no-print">
             <label>🔍 Ara:</label>
             <input type="text" id="defterArama" placeholder="Bölüm, açıklama veya kalem..." oninput="aramaYap()">
@@ -1987,6 +2004,7 @@
         }
 
         function ekranDegistir(id) {
+            modalKapat('modalGelirGider');
             const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','kullaniciYonetimPaneli','yoneticiPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
             paneller.forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -2340,8 +2358,21 @@
             tablolariGuncelle();
             document.getElementById('islemTutari').value = "";
             document.getElementById('islemAciklamasi').value = "";
+            modalKapat('modalGelirGider');
             toastGoster('İşlem eklendi ✓', 'basari');
             bulutaKaydetKuyrukla(true);
+        }
+
+        function gelirGiderModalAc() {
+            // Bugünün tarihini otomatik doldur
+            let bugun = new Date().toISOString().split('T')[0];
+            document.getElementById('islemTarihiInput').value = bugun;
+            // Formu sıfırla
+            document.getElementById('islemTuru').value = 'Gelir';
+            document.getElementById('islemTutari').value = '';
+            document.getElementById('islemAciklamasi').value = '';
+            formuDuzenle();
+            modalAc('modalGelirGider');
         }
 
         function tarihSirala(tarih) {
