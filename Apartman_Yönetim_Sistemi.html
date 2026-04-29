@@ -1119,7 +1119,7 @@
                 <button onclick="exceleAktar()" class="btn-koyu-mavi" style="width:auto;">📊 Excel</button>
             </div>
         </div>
-        <input type="file" id="bankaEkstresiDosyasi" accept=".xls,.xlsx,.xlsm" style="display:none;" onchange="bankaEkstresiSecildi(event)">
+        <input type="file" id="bankaEkstresiDosyasi" accept=".xls,.xlsx,.xlsm,.htm,.html" style="display:none;" onchange="bankaEkstresiSecildi(event)">
         <div class="no-print giris-formu">
             <div class="row">
                 <div class="col" style="min-width: 120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
@@ -2059,16 +2059,41 @@
             return hareketler;
         }
 
+        function htmlTablodanSatirlariOku(htmlMetni) {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(htmlMetni, 'text/html');
+            let satirlar = Array.from(doc.querySelectorAll('table tr')).map(tr =>
+                Array.from(tr.querySelectorAll('td,th')).map(td => (td.textContent || '').replace(/\u00a0/g, ' ').trim())
+            ).filter(satir => satir.some(hucre => hucre));
+            return satirlar;
+        }
+
         async function bankaEkstresiSecildi(event) {
             let dosya = event.target.files?.[0];
             if (!dosya) return;
             try {
-                if (!window.XLSX) throw new Error('Excel okuyucu yüklenemedi');
-                let buffer = await dosya.arrayBuffer();
-                let workbook = XLSX.read(buffer, { type: 'array' });
-                let sayfaAdi = workbook.SheetNames[0];
-                let sayfa = workbook.Sheets[sayfaAdi];
-                let satirlar = XLSX.utils.sheet_to_json(sayfa, { header: 1, raw: false, defval: '' });
+                let satirlar = [];
+                let dosyaAdi = (dosya.name || '').toLowerCase();
+
+                if (dosyaAdi.endsWith('.htm') || dosyaAdi.endsWith('.html')) {
+                    let htmlMetni = await dosya.text();
+                    satirlar = htmlTablodanSatirlariOku(htmlMetni);
+                } else {
+                    if (!window.XLSX) throw new Error('Excel okuyucu yüklenemedi');
+                    let buffer = await dosya.arrayBuffer();
+                    let workbook = XLSX.read(buffer, { type: 'array' });
+                    let sayfaAdi = workbook.SheetNames[0];
+                    let sayfa = workbook.Sheets[sayfaAdi];
+                    satirlar = XLSX.utils.sheet_to_json(sayfa, { header: 1, raw: false, defval: '' });
+
+                    if ((!satirlar || satirlar.length === 0) && dosyaAdi.endsWith('.xls')) {
+                        let kabukMetni = await dosya.text();
+                        if (kabukMetni.includes('TEB_Hareketler_dosyalar') || kabukMetni.includes('sheet001.htm')) {
+                            throw new Error('Bu .xls dosyası web sayfası kabuğu. TEB_Hareketler_dosyalar klasöründeki sheet001.htm dosyasını seçin ya da dosyayı Excel içinde .xlsx olarak yeniden kaydedin.');
+                        }
+                    }
+                }
+
                 _hazirBankaHareketleri = bankaSatirlariniHazirla(satirlar);
                 bankaOnizlemeGoster(dosya.name);
                 modalAc('modalBankaIceAktar');
