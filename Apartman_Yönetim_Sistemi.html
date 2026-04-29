@@ -582,6 +582,9 @@
             color: var(--mavi);
             font-size: 27px;
             line-height: 1.2;
+            text-align: center;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
         .auth-ust-baslik p { margin: 0; color: var(--metin-ac); font-size: 14px; }
         .auth-form { display: grid; gap: 12px; }
@@ -608,6 +611,20 @@
         .durum-basari { background: #dcfce7; color: #166534; }
         .durum-hata { background: #fee2e2; color: #991b1b; }
         .durum-bilgi { background: #dbeafe; color: #1d4ed8; }
+        .kullanici-kart {
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f8fbff;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: center;
+        }
+        .kullanici-kart strong { color: var(--mavi); }
+        .kullanici-kart small { display: block; color: var(--metin-ac); margin-top: 4px; }
+        .kullanici-kart-aksiyon { display: flex; gap: 8px; flex-wrap: wrap; }
 
         /* ── BASKIYA ÖZEL ────────────────────────────────────────────── */
         @media print {
@@ -625,8 +642,7 @@
     <div id="authPaneli" class="auth-ekrani no-print">
         <div class="auth-kart">
             <div class="auth-ust-baslik">
-                <h1>Şifreli Giriş</h1>
-                <p>Apartman verileri Supabase üzerinde tutulacak. Giriş yaptıktan sonra iki bilgisayarda da aynı kayıtlarla çalışacaksın.</p>
+                <h1>LIDER APARTMANI YONETIM SISTEMI</h1>
             </div>
             <div class="auth-form">
                 <div>
@@ -638,13 +654,7 @@
                     <input type="password" id="girisSifre" placeholder="Şifrenizi girin" autocomplete="current-password">
                 </div>
                 <div id="authDurum" class="durum-etiketi durum-bilgi">Supabase bağlantısı hazırlanıyor...</div>
-                <div class="row" style="margin:0;">
-                    <div class="col"><button class="btn-koyu-mavi" onclick="girisYap()">Giriş Yap</button></div>
-                    <div class="col"><button class="btn-success" onclick="hesapOlustur()">Hesap Oluştur</button></div>
-                </div>
-            </div>
-            <div class="auth-yardim">
-                Kurulum için `supabase-config.js` dosyasına Supabase proje URL'si ve `anon` anahtarını yazacağız.
+                <button class="btn-koyu-mavi" onclick="girisYap()">Giriş Yap</button>
             </div>
         </div>
     </div>
@@ -912,6 +922,7 @@
         <div class="ana-header">
             <h2 id="anaBaslik">🏢 Apartman Yönetim Sistemi</h2>
             <div class="ana-header-aksiyonlar">
+                <button onclick="ekranDegistir('kullaniciYonetimPaneli')" class="btn-success" style="width:auto;">Yönetici Paneli</button>
                 <div id="senkronDurum" class="durum-etiketi durum-bekliyor">Bulut senkron bekleniyor...</div>
                 <button onclick="verileriYedekle()" class="btn-koyu-mavi">💾 Yedekle</button>
                 <button onclick="document.getElementById('yedekDosyasi').click()" class="btn-koyu-mavi">📂 Yükle</button>
@@ -977,6 +988,24 @@
             </div>
         </div>
         <table><thead><tr><th>Bölüm</th><th>Ad Soyad</th><th>Telefon</th><th>E-Posta</th><th class="no-print">İşlem</th></tr></thead><tbody id="sakinlerTablosuGövdesi"></tbody></table>
+    </div>
+
+    <div id="kullaniciYonetimPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>🔐 Yönetici Paneli</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="no-print giris-formu">
+            <div class="row">
+                <div class="col"><label>Bölüm:</label><select id="kullaniciDaireSecimi"></select></div>
+                <div class="col"><label>Ad Soyad:</label><input type="text" id="kullaniciAdSoyad" placeholder="Sakin adı"></div>
+                <div class="col"><label>Telefon (Kullanıcı Adı):</label><input type="text" id="kullaniciTelefon" placeholder="05xxxxxxxxx"></div>
+                <div class="col"><label>Şifre:</label><input type="password" id="kullaniciSifre" placeholder="Şifre belirleyin"></div>
+                <div class="col"><label>&nbsp;</label><button class="btn-success" onclick="kullaniciKaydet()">Kullanıcı Kaydet</button></div>
+            </div>
+            <input type="hidden" id="kullaniciDuzenleId">
+        </div>
+        <div id="kullaniciListeAlani"></div>
     </div>
 
     <div id="yoneticiPaneli" class="container hidden">
@@ -1117,8 +1146,8 @@
         const SMS_API_KEY_KEY = 'vatanSmsApiKey';
         const SMS_SENDER_KEY = 'vatanSmsSender';
         const VERI_GUNCELLEME_KEY = 'apartmanVeriSonGuncelleme';
-        const UYGULAMA_LOCAL_KEYS = ['aptBilgi','apartmanDaireListesi','apartmanIslemleri','apartmanAidatAyarlari','apartmanEkButceAyarlari','apartmanManuelYillar','apartmanSakinleri',SMS_API_ID_KEY,SMS_API_KEY_KEY,SMS_SENDER_KEY,'vatanSmsSablon',VERI_GUNCELLEME_KEY];
-        let aptBilgi, daireListesi, islemler, aidatAyarlari, ekButceAyarlari, manuelYillar, sakinBilgileri, aktifEkButceAdi;
+        const UYGULAMA_LOCAL_KEYS = ['aptBilgi','apartmanDaireListesi','apartmanIslemleri','apartmanAidatAyarlari','apartmanEkButceAyarlari','apartmanManuelYillar','apartmanSakinleri','apartmanKullanicilari',SMS_API_ID_KEY,SMS_API_KEY_KEY,SMS_SENDER_KEY,'vatanSmsSablon',VERI_GUNCELLEME_KEY];
+        let aptBilgi, daireListesi, islemler, aidatAyarlari, ekButceAyarlari, manuelYillar, sakinBilgileri, kullaniciKayitlari, aktifEkButceAdi;
         let _supabase = null, _oturum = null, _uygulamaHazir = false, _depoyaYazimAskida = false, _senkronZamanlayici = null, _authDinleyiciKuruldu = false;
 
         function verileriYukle() {
@@ -1129,6 +1158,7 @@
             ekButceAyarlari = JSON.parse(localStorage.getItem('apartmanEkButceAyarlari')) || {};
             manuelYillar = JSON.parse(localStorage.getItem('apartmanManuelYillar')) || [];
             sakinBilgileri = JSON.parse(localStorage.getItem('apartmanSakinleri')) || {};
+            kullaniciKayitlari = JSON.parse(localStorage.getItem('apartmanKullanicilari')) || [];
         }
 
         function authDurumunuGuncelle(mesaj, tip = 'bilgi') {
@@ -1183,6 +1213,7 @@
             localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(veri.ekButceAyarlari || {}));
             localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
             localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
+            localStorage.setItem('apartmanKullanicilari', JSON.stringify(veri.kullaniciKayitlari || []));
             let smsAyarlari = veri.smsAyarlari || {};
             if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId); else localStorage.removeItem(SMS_API_ID_KEY);
             if (smsAyarlari.apiKey) localStorage.setItem(SMS_API_KEY_KEY, smsAyarlari.apiKey); else localStorage.removeItem(SMS_API_KEY_KEY);
@@ -1203,6 +1234,7 @@
                 ekButceAyarlari,
                 manuelYillar,
                 sakinBilgileri,
+                kullaniciKayitlari,
                 smsAyarlari: {
                     apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
                     apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
@@ -1233,6 +1265,7 @@
                 ekButceAyarlari: {},
                 manuelYillar: [],
                 sakinBilgileri: {},
+                kullaniciKayitlari: [],
                 smsAyarlari: {
                     apiId: '',
                     apiKey: '',
@@ -1368,7 +1401,7 @@
             if (!_oturum) {
                 _uygulamaHazir = false;
                 authPaneliniGoster();
-                authDurumunuGuncelle('Giriş yapın veya yeni hesap oluşturun.', 'bilgi');
+                authDurumunuGuncelle('Giriş yapın.', 'bilgi');
                 return;
             }
             authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
@@ -1473,6 +1506,7 @@
             basliklariGuncelle();
             apartmanBilgiFormunuDoldur();
             daireSecimKutusunuDoldur();
+            kullaniciSecimKutusunuDoldur();
             yillariYukle();
             secenekleriGuncelle();
             dinamikMenuleriCiz();
@@ -1524,9 +1558,10 @@
         }
 
         function ekranDegistir(id) {
-            const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','yoneticiPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
+            const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','kullaniciYonetimPaneli','yoneticiPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
             paneller.forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            if(id==='kullaniciYonetimPaneli') kullaniciYonetimPaneliniHazirla();
             if(id==='yoneticiPaneli') tablolariGuncelle();
             if(id==='aidatTakibiPaneli') aidatMatrisiniCiz();
             if(id==='aidatAyarlariPaneli') aidatAyarlariniEkranaGetir();
@@ -1588,6 +1623,137 @@
             document.getElementById('ilgiliDaire').innerHTML = defterHtml;
             let normalHtml = daireListesi.map(d => `<option value="${d}">${d}</option>`).join('');
             document.getElementById('sakinDaireSecimi').innerHTML = normalHtml;
+            kullaniciSecimKutusunuDoldur();
+        }
+
+        function telefonuNormalizeEt(telefon) {
+            return (telefon || '').replace(/\D/g, '');
+        }
+
+        async function sifreyiOzetle(sifre) {
+            let veri = new TextEncoder().encode(sifre);
+            let hashBuffer = await crypto.subtle.digest('SHA-256', veri);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function kullaniciSecimKutusunuDoldur() {
+            let secim = document.getElementById('kullaniciDaireSecimi');
+            if (!secim) return;
+            if (daireListesi.length === 0) {
+                secim.innerHTML = '<option value="">Önce bölüm ekleyin</option>';
+                return;
+            }
+            secim.innerHTML = daireListesi.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        function kullaniciFormTemizle() {
+            document.getElementById('kullaniciDuzenleId').value = '';
+            document.getElementById('kullaniciAdSoyad').value = '';
+            document.getElementById('kullaniciTelefon').value = '';
+            document.getElementById('kullaniciSifre').value = '';
+            if (daireListesi.length > 0) {
+                document.getElementById('kullaniciDaireSecimi').value = daireListesi[0];
+            }
+        }
+
+        function kullaniciYonetimPaneliniHazirla() {
+            kullaniciSecimKutusunuDoldur();
+            let alan = document.getElementById('kullaniciListeAlani');
+            if (!alan) return;
+            if (kullaniciKayitlari.length === 0) {
+                alan.innerHTML = '<div class="kart" style="text-align:center; color:#64748b;">Henüz tanımlı apartman sakini kullanıcı hesabı yok.</div>';
+                return;
+            }
+            let siraliKayitlar = [...kullaniciKayitlari].sort((a, b) => (a.daire || '').localeCompare(b.daire || '', 'tr'));
+            alan.innerHTML = siraliKayitlar.map(k => `
+                <div class="kullanici-kart">
+                    <div>
+                        <strong>${k.adSoyad || '-'}</strong>
+                        <small>Bölüm: ${k.daire || '-'} | Kullanıcı Adı: ${k.telefon || '-'}</small>
+                    </div>
+                    <div class="kullanici-kart-aksiyon">
+                        <button class="btn-duzenle" onclick="kullaniciDuzenle('${k.id}')">Düzenle</button>
+                        <button class="btn-danger" style="width:auto; padding:8px 12px;" onclick="kullaniciSil('${k.id}')">Sil</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function kullaniciDuzenle(id) {
+            let kayit = kullaniciKayitlari.find(k => k.id === id);
+            if (!kayit) return;
+            document.getElementById('kullaniciDuzenleId').value = kayit.id;
+            document.getElementById('kullaniciDaireSecimi').value = kayit.daire || '';
+            document.getElementById('kullaniciAdSoyad').value = kayit.adSoyad || '';
+            document.getElementById('kullaniciTelefon').value = kayit.telefon || '';
+            document.getElementById('kullaniciSifre').value = '';
+        }
+
+        async function kullaniciKaydet() {
+            let daire = document.getElementById('kullaniciDaireSecimi').value;
+            let adSoyad = document.getElementById('kullaniciAdSoyad').value.trim();
+            let telefonHam = document.getElementById('kullaniciTelefon').value.trim();
+            let telefon = telefonuNormalizeEt(telefonHam);
+            let sifre = document.getElementById('kullaniciSifre').value;
+            let duzenleId = document.getElementById('kullaniciDuzenleId').value;
+
+            if (!daire) return toastGoster('Önce bir bölüm seçin.', 'hata');
+            if (!adSoyad) return toastGoster('Ad soyad girin.', 'hata');
+            if (!telefon || telefon.length < 10) return toastGoster('Geçerli bir telefon numarası girin.', 'hata');
+            if (!duzenleId && !sifre) return toastGoster('Bu kullanıcı için şifre belirleyin.', 'hata');
+
+            let ayniTelefonVar = kullaniciKayitlari.some(k => k.telefon === telefon && k.id !== duzenleId);
+            if (ayniTelefonVar) return toastGoster('Bu telefon numarasıyla kayıtlı başka kullanıcı var.', 'hata');
+
+            let mevcutKayit = kullaniciKayitlari.find(k => k.id === duzenleId);
+            let sifreOzeti = mevcutKayit?.sifreOzeti || '';
+            if (sifre) sifreOzeti = await sifreyiOzetle(sifre);
+
+            let kayit = {
+                id: duzenleId || (crypto.randomUUID ? crypto.randomUUID() : `kullanici_${Date.now()}`),
+                daire,
+                adSoyad,
+                telefon,
+                sifreOzeti,
+                guncellenme: new Date().toISOString()
+            };
+
+            if (mevcutKayit) {
+                kullaniciKayitlari = kullaniciKayitlari.map(k => k.id === duzenleId ? { ...mevcutKayit, ...kayit } : k);
+            } else {
+                kullaniciKayitlari.push({
+                    ...kayit,
+                    olusturma: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem('apartmanKullanicilari', JSON.stringify(kullaniciKayitlari));
+            kullaniciFormTemizle();
+            kullaniciYonetimPaneliniHazirla();
+            toastGoster('Kullanıcı kaydedildi.', 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function kullaniciSil(id) {
+            let kayit = kullaniciKayitlari.find(k => k.id === id);
+            if (!kayit) return;
+            onayla({
+                baslik: `"${kayit.adSoyad}" silinsin mi?`,
+                mesaj: 'Bu apartman sakini kullanıcı hesabı kaldırılacak.',
+                ikon: '👤',
+                onayMetin: 'Evet, Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                kullaniciKayitlari = kullaniciKayitlari.filter(k => k.id !== id);
+                localStorage.setItem('apartmanKullanicilari', JSON.stringify(kullaniciKayitlari));
+                if (document.getElementById('kullaniciDuzenleId').value === id) {
+                    kullaniciFormTemizle();
+                }
+                kullaniciYonetimPaneliniHazirla();
+                toastGoster('Kullanıcı silindi.', 'bilgi');
+                bulutaKaydetKuyrukla(true);
+            });
         }
 
         function yeniDaireEkle() {
@@ -1623,14 +1789,17 @@
             }, () => {
                 daireListesi = daireListesi.filter(d => d !== ad);
                 delete sakinBilgileri[ad];
+                kullaniciKayitlari = kullaniciKayitlari.filter(k => k.daire !== ad);
                 Object.keys(aidatAyarlari).forEach(yil => {
                     if(aidatAyarlari[yil]) delete aidatAyarlari[yil][ad];
                 });
                 localStorage.setItem('apartmanDaireListesi', JSON.stringify(daireListesi));
                 localStorage.setItem('apartmanSakinleri', JSON.stringify(sakinBilgileri));
+                localStorage.setItem('apartmanKullanicilari', JSON.stringify(kullaniciKayitlari));
                 localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(aidatAyarlari));
-            bulutaKaydetKuyrukla(true);
+                bulutaKaydetKuyrukla(true);
                 daireSecimKutusunuDoldur();
+                kullaniciYonetimPaneliniHazirla();
                 aidatAyarlariniEkranaGetir();
                 sakinTablosunuDoldur();
                 if(daireListesi.length > 0) document.getElementById('sakinDaireSecimi').value = daireListesi[0];
