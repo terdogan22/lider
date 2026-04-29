@@ -1,0 +1,3045 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title id="sayfaBasligi">Apartman Yönetim Sistemi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── TASARIM DEĞİŞKENLERİ ───────────────────────────────────── */
+        :root {
+            --mavi:        #1e40af;
+            --mavi-ac:     #3b82f6;
+            --mavi-hover:  #1e3a8a;
+            --yesil:       #16a34a;
+            --yesil-hover: #15803d;
+            --kirmizi:     #dc2626;
+            --kirmizi-hover:#b91c1c;
+            --sari:        #d97706;
+            --sari-hover:  #b45309;
+            --arkaplan:    #f1f5f9;
+            --kart:        #ffffff;
+            --sinir:       #e2e8f0;
+            --metin:       #1e293b;
+            --metin-ac:    #64748b;
+            --golge:       0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+            --golge-hover: 0 4px 12px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08);
+            --yaricap:     10px;
+            --yaricap-kk:  6px;
+        }
+
+        /* ── TEMEL ───────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--arkaplan);
+            margin: 0; padding: 24px 20px;
+            color: var(--metin);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .container {
+            background: var(--kart);
+            padding: 28px 32px;
+            border-radius: 16px;
+            box-shadow: var(--golge);
+            max-width: 1240px;
+            margin: auto;
+        }
+        .hidden { display: none !important; }
+
+        /* ── INPUT & SELECT ─────────────────────────────────────────── */
+        input, select, textarea {
+            padding: 9px 12px;
+            margin: 4px 0;
+            width: 100%;
+            border: 1.5px solid var(--sinir);
+            border-radius: var(--yaricap-kk);
+            font-family: inherit;
+            font-size: 13.5px;
+            color: var(--metin);
+            background: #f8fafc;
+            transition: border-color .18s, box-shadow .18s;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--mavi-ac);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+        }
+        input[type=date] { cursor: pointer; }
+        input[type=number] { -moz-appearance: textfield; }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* ── BUTONLAR ────────────────────────────────────────────────── */
+        button {
+            border: none; cursor: pointer;
+            border-radius: var(--yaricap-kk);
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            width: 100%;
+            transition: background .18s, transform .12s, box-shadow .18s;
+            letter-spacing: .01em;
+        }
+        button:active { transform: scale(.97); }
+
+        .btn-koyu-mavi { background: var(--mavi); color: #fff; }
+        .btn-koyu-mavi:hover { background: var(--mavi-hover); box-shadow: 0 2px 8px rgba(30,64,175,.3); }
+
+        .btn-danger { background: var(--kirmizi); color: #fff; }
+        .btn-danger:hover { background: var(--kirmizi-hover); box-shadow: 0 2px 8px rgba(220,38,38,.3); }
+
+        .btn-success { background: var(--yesil); color: #fff; }
+        .btn-success:hover { background: var(--yesil-hover); box-shadow: 0 2px 8px rgba(22,163,74,.3); }
+
+        .btn-geri { background: #fef3c7; color: var(--sari); border: 1.5px solid #fcd34d; }
+        .btn-geri:hover { background: #fde68a; }
+
+        .btn-duzenle { background: #fef3c7; color: var(--sari); border: 1.5px solid #fcd34d; padding: 4px 10px; font-size: 12px; }
+        .btn-duzenle:hover { background: #fde68a; }
+
+        /* ── PANEL BAŞLIĞI ────────────────────────────────────────────── */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--sinir);
+        }
+        .panel-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--mavi);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-header .btn-grup { display: flex; gap: 8px; flex-wrap: wrap; }
+        .panel-header .btn-grup button { width: auto; }
+
+        /* ── ANA MENÜ ────────────────────────────────────────────────── */
+        .ana-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .ana-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--mavi);
+        }
+        .ana-header-aksiyonlar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .ana-header-aksiyonlar button { width: auto; padding: 9px 14px; font-size: 13px; }
+
+        .menu-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 24px; }
+        .menu-karti {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            padding: 28px 20px;
+            border-radius: 14px;
+            text-align: center;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(30,64,175,.25);
+            transition: transform .2s, box-shadow .2s;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        .menu-karti:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,64,175,.35); }
+        .menu-karti[style*="#17a2b8"] { background: linear-gradient(135deg, #0891b2, #0e7490) !important; box-shadow: 0 4px 12px rgba(8,145,178,.25); }
+        .menu-karti[style*="#17a2b8"]:hover { box-shadow: 0 8px 24px rgba(8,145,178,.35) !important; }
+        .menu-karti[style*="#6f42c1"] { background: linear-gradient(135deg, #7c3aed, #5b21b6) !important; box-shadow: 0 4px 12px rgba(124,58,237,.25); }
+        .menu-karti[style*="#6f42c1"]:hover { box-shadow: 0 8px 24px rgba(124,58,237,.35) !important; }
+
+        /* ── TABLOLAR ────────────────────────────────────────────────── */
+        .matris-tablo { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12.5px; text-align: center; }
+        .matris-tablo th, .matris-tablo td { border: 1px solid #e2e8f0; padding: 4px 3px; }
+        .matris-tablo th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white; position: sticky; top: 0;
+            padding: 10px 6px; font-size: 12px; letter-spacing: .02em;
+        }
+        .matris-tablo td:first-child {
+            font-weight: 600; background: #f8fafc;
+            text-align: left; padding-left: 12px; width: 130px;
+            border-right: 2px solid #cbd5e1;
+        }
+        .matris-tablo tbody tr:hover td { background-color: #f0f9ff; }
+        .matris-tablo tbody tr:hover td:first-child { background-color: #e0f2fe; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+        thead tr { background: linear-gradient(135deg, #1e293b, #334155); }
+        th { color: white; padding: 10px 10px; text-align: left; font-size: 12.5px; font-weight: 600; letter-spacing: .03em; }
+        td { border-bottom: 1px solid var(--sinir); padding: 9px 10px; }
+        tbody tr:hover td { background: #f8fafc; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ── DURUM KUTULARI ────────────────────────────────────────── */
+        .durum-kutu {
+            padding: 5px 4px; width: 100%; border-radius: 5px;
+            font-size: 11.5px; font-weight: 700; color: white;
+            box-sizing: border-box; display: block; letter-spacing: .02em;
+        }
+        .odendi { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .odenmedi { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .gelecek-ay { color: #94a3b8; font-weight: 700; font-size: 15px; }
+        .borc-sutun { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; color: white !important; font-weight: 700; font-size: 13px; }
+        .borc-sifir  { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: white !important; font-weight: 700; font-size: 13px; }
+        .print-only { display: none; }
+
+        /* ── DEFTER ───────────────────────────────────────────────── */
+        .defter-satiri { display: flex; gap: 16px; align-items: flex-start; flex-wrap: nowrap; margin-top: 16px; }
+        .defter-sutunu {
+            flex: 1; width: 50%;
+            background: #fff;
+            border: 1.5px solid var(--sinir);
+            border-radius: var(--yaricap);
+            padding: 16px;
+            overflow-x: auto;
+        }
+        .defter-sutunu h3 {
+            margin: 0 0 12px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--metin-ac);
+        }
+        .row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 140px; }
+
+        .bakiye-kutusu {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+            color: white !important;
+            text-align: center; padding: 16px 20px;
+            border-radius: var(--yaricap); font-size: 17px;
+            margin-top: 16px; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(14,165,233,.3);
+            letter-spacing: .02em;
+        }
+
+        /* ── YIL PANELİ ───────────────────────────────────────────── */
+        .yil-paneli {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: var(--mavi);
+            border: 1.5px solid #bfdbfe;
+            padding: 14px 18px;
+            border-radius: var(--yaricap);
+            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .yil-paneli select { width: auto; background: white; }
+        .yil-paneli button { width: auto; }
+
+        /* ── AYARLAR ──────────────────────────────────────────────── */
+        .ayarlar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+        .ayar-kutu {
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: var(--yaricap);
+            border: 1.5px solid var(--sinir);
+            transition: border-color .18s, box-shadow .18s;
+        }
+        .ayar-kutu:hover { border-color: var(--mavi-ac); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+        .ayar-kutu strong { font-size: 13px; color: var(--metin); }
+
+        /* ── ARAMA BARI ───────────────────────────────────────────── */
+        .arama-bar {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc;
+            border: 1.5px solid var(--sinir);
+            border-radius: var(--yaricap);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+        .arama-bar label { font-weight: 600; color: var(--metin-ac); white-space: nowrap; font-size: 13px; }
+        .arama-bar input { margin: 0; background: white; }
+        .arama-bar button { width: auto; padding: 8px 14px; }
+
+        /* ── GİRİŞ FORMU (defter) ─────────────────────────────────── */
+        .giris-formu {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1.5px solid #bae6fd;
+            border-radius: var(--yaricap);
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+
+        /* ── SAYFA KONTROL ────────────────────────────────────────── */
+        .sayfa-kontrol {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 0; font-size: 13px; color: var(--metin-ac);
+        }
+        .sayfa-kontrol button { width: auto; padding: 6px 12px; font-size: 12px; }
+
+        /* ── ÖZEL ONAY MODALİ ─────────────────────────────────────── */
+        #modalOnay .modal-kutu { text-align: center; padding: 40px 32px 28px; }
+        #onayIkon { font-size: 54px; line-height: 1; margin-bottom: 14px; display: block; }
+        #onayBaslik { font-size: 20px; font-weight: 700; color: var(--metin); margin: 0 0 10px; }
+        #onayMesaj { color: var(--metin-ac); font-size: 14px; line-height: 1.7; margin: 0 0 5px; white-space: pre-wrap; }
+        #onayButonlar { justify-content: center !important; }
+        #onayButonlar button { min-width: 130px; font-size: 14px; }
+
+        /* ── MODAL ────────────────────────────────────────────────── */
+        .modal-arkaplan {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,23,42,.55);
+            backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; animation: yavascaAc 0.2s;
+        }
+        .modal-kutu {
+            background: white; padding: 28px 28px 24px;
+            border-radius: 16px; width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-kutu h3 {
+            margin-top: 0; color: var(--mavi);
+            text-align: center;
+            border-bottom: 2px solid var(--sinir);
+            padding-bottom: 14px; margin-bottom: 16px;
+            font-size: 17px; font-weight: 700;
+        }
+        .modal-kutu label {
+            font-weight: 600; display: block;
+            margin-top: 12px; color: var(--metin);
+            font-size: 12.5px; letter-spacing: .02em;
+            text-transform: uppercase;
+        }
+        .modal-butonlar { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; }
+        @keyframes yavascaAc { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* ── WHATSAPP MODALİ ──────────────────────────────────────────── */
+        #modalWhatsapp { align-items: flex-start; padding-top: 2vh; }
+        .wa-modal-kutu {
+            display: flex; flex-direction: column;
+            width: min(960px, 97vw);
+            height: min(93vh, 940px);
+            background: white; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            overflow: hidden;
+        }
+        .wa-modal-baslik {
+            padding: 14px 20px 13px; border-bottom: 2px solid #25D366;
+            flex-shrink: 0; background: #f0faf3;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .wa-modal-baslik h3 { margin: 0; color: #14532d; font-size: 16px; font-weight: 700; }
+        .wa-modal-kapat-btn {
+            background: none; border: none; font-size: 20px; cursor: pointer;
+            color: #888; padding: 0; width: auto; line-height: 1;
+        }
+        .wa-modal-kapat-btn:hover { color: #333; }
+        .wa-sablon-alani { padding: 12px 20px 10px; background: #f8f9fa; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+        .wa-sablon-alani label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .04em; }
+        .wa-mesaj-alani {
+            width: 100%; box-sizing: border-box; padding: 10px 13px;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
+            font-size: 13.5px; resize: vertical; min-height: 72px; max-height: 130px;
+            font-family: 'Inter', Arial, sans-serif; line-height: 1.6;
+        }
+        .wa-mesaj-alani:focus { outline: none; border-color: #25D366; box-shadow: 0 0 0 3px rgba(37,211,102,.15); }
+        .wa-degiskenler { font-size: 11.5px; color: #94a3b8; margin-top: 4px; }
+        .wa-degiskenler b { color: #475569; background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 2px; }
+        .wa-ozet {
+            padding: 9px 20px; background: #ecfdf5;
+            border-bottom: 1px solid #bbf7d0;
+            font-size: 13px; color: #15803d; flex-shrink: 0; font-weight: 600;
+        }
+        /* Liste */
+        .wa-liste-alani { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .wa-secim-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 14px; background: #f1f5f9; border-radius: 9px;
+            margin-bottom: 10px; position: sticky; top: 0; z-index: 2;
+            border: 1.5px solid #e2e8f0;
+        }
+        .wa-secim-bar label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 13.5px; color: #334155; margin: 0; }
+        .wa-secim-bar input[type=checkbox] { width: 17px; height: 17px; cursor: pointer; accent-color: #25D366; }
+        .wa-secili-sayisi { font-size: 12px; color: #475569; background: white; padding: 4px 12px; border-radius: 12px; font-weight: 700; border: 1.5px solid #e2e8f0; }
+        /* 2 kolonlu kart grid */
+        .wa-kart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .wa-kart {
+            display: grid;
+            grid-template-columns: 22px 1fr 38px;
+            align-items: start; gap: 10px;
+            background: #fff; border: 1.5px solid #e2e8f0;
+            border-left: 5px solid #25D366; border-radius: 11px;
+            padding: 12px 13px;
+            transition: background .12s, box-shadow .12s;
+        }
+        .wa-kart:hover { background: #f0faf3; box-shadow: 0 3px 10px rgba(37,211,102,.1); }
+        .wa-kart.telefon-yok { border-left-color: #cbd5e1; }
+        .wa-kart input[type=checkbox] { width: 18px; height: 18px; accent-color: #25D366; cursor: pointer; margin-top: 2px; }
+        .wa-kart-bilgi { min-width: 0; }
+        .wa-kart-ad   { font-size: 13.5px; color: #1e293b; font-weight: 700; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-kart-satir { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .wa-tel       { font-size: 12px; color: #475569; }
+        .wa-borc      { font-size: 12.5px; color: #dc2626; font-weight: 700; white-space: nowrap; }
+        .wa-aylar     { font-size: 11.5px; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-whatsapp {
+            width: 38px; height: 38px; padding: 0; align-self: center;
+            background: #25D366; color: white; border: none; border-radius: 9px;
+            font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background .15s;
+        }
+        .btn-whatsapp:hover { background: #1da851; }
+        .btn-whatsapp:disabled { background: #e2e8f0; cursor: not-allowed; font-size: 14px; }
+        .wa-modal-footer {
+            padding: 13px 20px; border-top: 1.5px solid #e2e8f0;
+            display: flex; gap: 10px; flex-shrink: 0; background: #f8fafc; align-items: center;
+        }
+        .wa-btn-kapat {
+            flex: 0 0 auto; padding: 11px 24px; font-size: 13.5px; font-weight: 700;
+            border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer;
+            background: #fff; color: #64748b; width: auto; transition: background .15s;
+        }
+        .wa-btn-kapat:hover { background: #f1f5f9; }
+        .wa-btn-gonder {
+            flex: 1; padding: 11px 16px; font-size: 14px; font-weight: 700;
+            border: none; border-radius: 8px; cursor: pointer;
+            background: #25D366; color: white; transition: background .15s;
+        }
+        .wa-btn-gonder:hover { background: #1da851; }
+        .wa-bos-mesaj { text-align: center; padding: 40px 20px; color: #16a34a; font-weight: 600; font-size: 15px; }
+        .wa-kart.aktif-adim { outline: 2.5px solid #25D366; background: #f0fdf4; }
+        .wa-siralı-panel { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .wa-siralı-ilerleme { display: flex; align-items: center; gap: 10px; }
+        .wa-siralı-ilerleme-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .wa-siralı-ilerleme-bar-ic { height: 100%; background: #25D366; border-radius: 99px; transition: width .3s; }
+        .wa-siralı-kisi { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 14px; }
+        .wa-siralı-kisi-ad { font-weight: 700; font-size: 14px; color: #166534; }
+        .wa-siralı-kisi-detay { font-size: 12px; color: #64748b; margin-top: 2px; }
+        .wa-siralı-butonlar { display: flex; gap: 8px; }
+        .wa-btn-ac { flex: 1; padding: 11px; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: #25D366; color: white; transition: background .15s; }
+        .wa-btn-ac:hover { background: #1da851; }
+        .wa-btn-sonraki { flex: 1; padding: 11px; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: #1e40af; color: white; transition: background .15s; }
+        .wa-btn-sonraki:hover { background: #1d4ed8; }
+        .wa-btn-iptal { flex: 0 0 auto; padding: 11px 18px; font-size: 13px; font-weight: 600; border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer; background: #fff; color: #64748b; transition: background .15s; }
+        .wa-btn-iptal:hover { background: #f1f5f9; }
+
+        /* ── SMS MODALİ ──────────────────────────────────────────────── */
+        #modalSms { align-items: flex-start; padding-top: 2vh; }
+        .sms-modal-kutu {
+            display: flex; flex-direction: column;
+            width: min(960px, 97vw);
+            height: min(93vh, 940px);
+            background: white; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            overflow: hidden;
+        }
+        .sms-modal-baslik {
+            padding: 14px 20px 13px; border-bottom: 2px solid #1e40af;
+            flex-shrink: 0; background: #eff6ff;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sms-modal-baslik h3 { margin: 0; color: #1e3a8a; font-size: 16px; font-weight: 700; }
+        .sms-api-toggle-btn {
+            background: #dbeafe; color: #1e40af; border: 1.5px solid #93c5fd;
+            border-radius: 7px; padding: 6px 13px; font-size: 12.5px; font-weight: 700;
+            cursor: pointer; width: auto; transition: background .15s;
+        }
+        .sms-api-toggle-btn:hover { background: #bfdbfe; }
+        .sms-api-toggle-btn.aktif { background: #1e40af; color: white; border-color: #1e40af; }
+        .sms-modal-kapat-btn {
+            background: none; border: none; font-size: 20px; cursor: pointer;
+            color: #888; padding: 0; width: auto; line-height: 1;
+        }
+        .sms-modal-kapat-btn:hover { color: #333; }
+        .sms-api-alani {
+            padding: 14px 20px 12px; background: #f0f7ff;
+            border-bottom: 1.5px solid #bfdbfe; flex-shrink: 0;
+            animation: smsSlideDown .18s ease;
+        }
+        @keyframes smsSlideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+        .sms-api-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .sms-api-row .col { flex:1; min-width: 160px; }
+        .sms-api-row .col label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 3px; display: block; text-transform: uppercase; letter-spacing: .04em; }
+        .sms-api-row input { margin: 0; font-size: 13px; }
+        .sms-sablon-alani { padding: 12px 20px 10px; background: #f8f9fa; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+        .sms-sablon-alani > label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .04em; }
+        .sms-mesaj-alani {
+            width: 100%; box-sizing: border-box; padding: 10px 13px;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
+            font-size: 13.5px; resize: vertical; min-height: 72px; max-height: 130px;
+            font-family: 'Inter', Arial, sans-serif; line-height: 1.6;
+        }
+        .sms-mesaj-alani:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(30,64,175,.15); }
+        .sms-degiskenler { font-size: 11.5px; color: #94a3b8; }
+        .sms-degiskenler b { color: #475569; background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 2px; }
+        .sms-karakter-sayaci { font-size: 11px; color: #64748b; white-space: nowrap; }
+        .sms-ozet {
+            padding: 9px 20px; background: #eff6ff;
+            border-bottom: 1px solid #bfdbfe;
+            font-size: 13px; color: #1e40af; flex-shrink: 0; font-weight: 600;
+        }
+        /* Liste */
+        .sms-liste-alani { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .sms-secim-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 14px; background: #f1f5f9; border-radius: 9px;
+            margin-bottom: 10px; position: sticky; top: 0; z-index: 2;
+            border: 1.5px solid #e2e8f0;
+        }
+        .sms-secim-bar label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 13.5px; color: #334155; margin: 0; }
+        .sms-secim-bar input[type=checkbox] { width: 17px; height: 17px; cursor: pointer; accent-color: #1e40af; }
+        .sms-secili-sayisi { font-size: 12px; color: #475569; background: white; padding: 4px 12px; border-radius: 12px; font-weight: 700; border: 1.5px solid #e2e8f0; }
+        /* 2 kolonlu kart grid */
+        .sms-kart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sms-kart {
+            display: grid;
+            grid-template-columns: 22px 1fr 38px;
+            align-items: start; gap: 10px;
+            background: #fff; border: 1.5px solid #e2e8f0;
+            border-left: 5px solid #1e40af; border-radius: 11px;
+            padding: 12px 13px;
+            transition: background .12s, box-shadow .12s;
+        }
+        .sms-kart:hover { background: #f8faff; box-shadow: 0 3px 10px rgba(30,64,175,.09); }
+        .sms-kart.telefon-yok { border-left-color: #cbd5e1; }
+        .sms-kart input[type=checkbox] { width: 18px; height: 18px; accent-color: #1e40af; cursor: pointer; margin-top: 2px; }
+        .sms-kart-bilgi { min-width: 0; }
+        .sms-kart-ad    { font-size: 13.5px; color: #1e293b; font-weight: 700; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sms-kart-satir { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .sms-kart-tel   { font-size: 12px; color: #475569; }
+        .sms-kart-borc  { font-size: 12.5px; color: #dc2626; font-weight: 700; white-space: nowrap; }
+        .sms-kart-aylar { font-size: 11.5px; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sms-durum-satiri { font-size: 11.5px; margin-top: 4px; font-weight: 600; }
+        .btn-sms-tek {
+            width: 38px; height: 38px; padding: 0; align-self: center;
+            background: #1e40af; color: white; border: none; border-radius: 9px;
+            font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background .15s;
+        }
+        .btn-sms-tek:hover { background: #1e3a8a; }
+        .btn-sms-tek:disabled { background: #e2e8f0; cursor: not-allowed; font-size: 14px; }
+        .sms-modal-footer {
+            padding: 13px 20px; border-top: 1.5px solid #e2e8f0;
+            display: flex; gap: 10px; flex-shrink: 0; background: #f8fafc; align-items: center;
+        }
+        .sms-btn-kapat {
+            flex: 0 0 auto; padding: 11px 24px; font-size: 13.5px; font-weight: 700;
+            border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer;
+            background: #fff; color: #64748b; width: auto; transition: background .15s;
+        }
+        .sms-btn-kapat:hover { background: #f1f5f9; }
+        .sms-btn-gonder {
+            flex: 1; padding: 11px 16px; font-size: 14px; font-weight: 700;
+            border: none; border-radius: 8px; cursor: pointer;
+            background: #1e40af; color: white; transition: background .15s;
+        }
+        .sms-btn-gonder:hover { background: #1e3a8a; }
+        .sms-btn-gonder:disabled { background: #94a3b8; cursor: not-allowed; }
+        .sms-bos-mesaj { text-align: center; padding: 40px 20px; color: #1e40af; font-weight: 600; font-size: 15px; }
+        .sms-durum-bekliyor { color: #d97706; }
+        .sms-durum-basarili { color: #16a34a; }
+        .sms-durum-hata     { color: #dc2626; }
+
+        /* ── TOAST ────────────────────────────────────────────────────── */
+        #toastKap { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            padding: 13px 20px; border-radius: 10px; font-weight: 600;
+            font-size: 13.5px; color: white; min-width: 240px; max-width: 340px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.18);
+            opacity: 0; transform: translateX(20px);
+            transition: opacity .28s, transform .28s;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        .toast-gorunum { opacity: 1; transform: translateX(0); }
+        .toast-basari { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .toast-hata    { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .toast-uyari   { background: linear-gradient(135deg, #d97706, #b45309); }
+        .toast-bilgi   { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .auth-ekrani {
+            min-height: calc(100vh - 48px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-kart {
+            width: 100%;
+            max-width: 460px;
+            background: linear-gradient(160deg, #ffffff, #f8fbff);
+            border: 1px solid #dbeafe;
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(30,64,175,.12);
+            padding: 32px;
+        }
+        .auth-ust-baslik { margin-bottom: 20px; }
+        .auth-ust-baslik h1 {
+            margin: 0 0 8px;
+            color: var(--mavi);
+            font-size: 27px;
+            line-height: 1.2;
+        }
+        .auth-ust-baslik p { margin: 0; color: var(--metin-ac); font-size: 14px; }
+        .auth-form { display: grid; gap: 12px; }
+        .auth-yardim {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12.5px;
+            line-height: 1.5;
+        }
+        .durum-etiketi {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .durum-bekliyor { background: #fef3c7; color: #92400e; }
+        .durum-basari { background: #dcfce7; color: #166534; }
+        .durum-hata { background: #fee2e2; color: #991b1b; }
+        .durum-bilgi { background: #dbeafe; color: #1d4ed8; }
+
+        /* ── BASKIYA ÖZEL ────────────────────────────────────────────── */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .container { box-shadow: none; max-width: 100%; border: none; padding: 0; }
+            .defter-sutunu { border: none; padding: 0; }
+            #aptKart { border: 2px solid #1e40af !important; background: white !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="authPaneli" class="auth-ekrani no-print">
+        <div class="auth-kart">
+            <div class="auth-ust-baslik">
+                <h1>Şifreli Giriş</h1>
+                <p>Apartman verileri Supabase üzerinde tutulacak. Giriş yaptıktan sonra iki bilgisayarda da aynı kayıtlarla çalışacaksın.</p>
+            </div>
+            <div class="auth-form">
+                <div>
+                    <label>E-posta</label>
+                    <input type="email" id="girisEposta" placeholder="ornek@site.com" autocomplete="username">
+                </div>
+                <div>
+                    <label>Şifre</label>
+                    <input type="password" id="girisSifre" placeholder="Şifrenizi girin" autocomplete="current-password">
+                </div>
+                <div id="authDurum" class="durum-etiketi durum-bilgi">Supabase bağlantısı hazırlanıyor...</div>
+                <div class="row" style="margin:0;">
+                    <div class="col"><button class="btn-koyu-mavi" onclick="girisYap()">Giriş Yap</button></div>
+                    <div class="col"><button class="btn-success" onclick="hesapOlustur()">Hesap Oluştur</button></div>
+                </div>
+            </div>
+            <div class="auth-yardim">
+                Kurulum için `supabase-config.js` dosyasına Supabase proje URL'si ve `anon` anahtarını yazacağız.
+            </div>
+        </div>
+    </div>
+
+    <div id="uygulamaKabugu" class="hidden">
+
+    <!-- TOAST BİLDİRİM KAPSAYICI -->
+    <div id="toastKap"></div>
+
+    <!-- İŞLEM DÜZENLEME MODALİ -->
+    <div id="modalIslemDuzenle" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>✎ İşlemi Düzenle</h3>
+            <input type="hidden" id="duzenleIdx">
+            <div class="row">
+                <div class="col"><label>Tarih:</label><input type="date" id="duzenleTarih"></div>
+                <div class="col"><label>Tür:</label><select id="duzenleTur" onchange="duzenleFormuGuncelle()"><option value="Gelir">Gelir</option><option value="Gider">Gider</option></select></div>
+            </div>
+            <div class="row">
+                <div class="col" id="duzenleDaireKutu"><label>Bölüm:</label><select id="duzenleDaire"></select></div>
+                <div class="col" id="duzenleAyKutu"><label>Kalem:</label><select id="duzenleAy"></select></div>
+                <div class="col hidden" id="duzenleGiderKutu"><label>Gider Türü:</label><select id="duzenleGiderTuru"></select></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>Tutar (TL):</label><input type="number" id="duzenleTutar" min="0"></div>
+                <div class="col"><label>Açıklama:</label><input type="text" id="duzenleAciklama"></div>
+            </div>
+            <div class="modal-butonlar">
+                <button class="btn-danger" style="width:45%;" onclick="modalKapat('modalIslemDuzenle')">İptal</button>
+                <button class="btn-success" style="width:55%;" onclick="duzenleKaydet()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TOPLU ÖDEME MODALİ -->
+    <div id="modalTopluOdeme" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu" style="width:560px;">
+            <h3>💰 Toplu Aidat Ödemesi</h3>
+            <p style="font-size:13px;color:#666;margin:0 0 14px;">Seçilen ayların ödemelerini tek seferde kayıt eder.</p>
+            <div class="row">
+                <div class="col"><label>Daire / Bölüm:</label><select id="topluDaire" onchange="topluOnizlemeGuncelle()"></select></div>
+                <div class="col"><label>Yıl:</label><select id="topluYil" onchange="topluOnizlemeGuncelle()"></select></div>
+            </div>
+            <div class="row" style="margin-top:4px;">
+                <div class="col"><label>Başlangıç Ayı:</label><select id="topluAyBasla" onchange="topluOnizlemeGuncelle()"></select></div>
+                <div class="col"><label>Bitiş Ayı:</label><select id="topluAyBitis" onchange="topluOnizlemeGuncelle()"></select></div>
+            </div>
+            <div class="row" style="margin-top:4px;">
+                <div class="col">
+                    <label>Ödeme Tarihi:</label>
+                    <input type="date" id="topluTarih" onchange="topluOnizlemeGuncelle()">
+                </div>
+                <div class="col">
+                    <label>Her Ay Tutarı (TL):</label>
+                    <input type="number" id="topluTutar" min="0" placeholder="Boş = aidat ayarından" oninput="topluOnizlemeGuncelle()">
+                </div>
+            </div>
+            <!-- Ön izleme -->
+            <div class="toplu-onizleme" id="topluOnizleme" style="display:none;">
+                <div class="toplu-onizleme-baslik">
+                    <span id="topluOnizlemeBaslik">Ödeme Listesi</span>
+                    <span id="topluOnizlemeSayisi"></span>
+                </div>
+                <div id="topluOnizlemeSatirlar"></div>
+                <div class="toplu-toplam">
+                    <span>TOPLAM</span>
+                    <span id="topluOnizlemeToplam">0,00 TL</span>
+                </div>
+            </div>
+            <div id="topluUyari" style="color:#dc3545;font-size:13px;margin-top:8px;display:none;"></div>
+            <div class="modal-butonlar">
+                <button class="btn-danger" style="width:45%;" onclick="modalKapat('modalTopluOdeme')">İptal</button>
+                <button class="btn-success" style="width:55%;" id="topluKaydetBtn" onclick="topluOdemeKaydet()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARA DÖNEM ÖDEME MODALİ -->
+    <div id="modalAraDonemi" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>📅 Ara Dönem Ödeme Hesabı</h3>
+            <p style="font-size:13px;color:#555;margin:0 0 12px;">Daire satışı veya taşınma durumunda kısmi ay aidatını hesaplar.</p>
+            <div class="row">
+                <div class="col"><label>Daire:</label><select id="araDaire"></select></div>
+                <div class="col"><label>Yıl:</label><select id="araYil"></select></div>
+                <div class="col"><label>Ay:</label><select id="araAy"></select></div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>Durum:</label>
+                    <select id="araMod">
+                        <option value="giris">Taşındı (giriş günü)</option>
+                        <option value="cikis">Taşındı (çıkış günü)</option>
+                    </select>
+                </div>
+                <div class="col"><label>Gün (1-31):</label><input type="number" id="araGun" min="1" max="31" value="1"></div>
+            </div>
+            <button class="btn-koyu-mavi" style="margin-top:10px;" onclick="araDonemiHesapla()">🧮 Hesapla</button>
+            <div class="ara-hesap-kutu">
+                <div class="ara-sonuc" id="araSonucYazi">— Hesapla butonuna basın —</div>
+                <label>Hesaplanan Tutar (TL):</label>
+                <input type="number" id="araHesapTutar" min="0" placeholder="Hesapla butonuna basın">
+                <label>Açıklama:</label>
+                <input type="text" id="araAciklama" placeholder="Otomatik dolar">
+            </div>
+            <div class="modal-butonlar">
+                <button class="btn-danger" style="width:45%;" onclick="modalKapat('modalAraDonemi')">İptal</button>
+                <button class="btn-success" style="width:55%;" onclick="araDonemiKaydet()">💾 Ödeme Ekle</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalApartmanBilgi" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>🏢 Apartman & Finansal Bilgiler</h3>
+            <label>Apartman Adı:</label><input type="text" id="inpAptAd">
+            <label>Resmi Ünvan:</label><input type="text" id="inpAptUnvan">
+            <div class="row">
+                <div class="col"><label>Yönetici:</label><input type="text" id="inpAptYon"></div>
+                <div class="col"><label>Yönetici Yard.:</label><input type="text" id="inpAptYonYar"></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>Vergi Dairesi:</label><input type="text" id="inpAptVergiDaire"></div>
+                <div class="col"><label>Vergi Kimlik No:</label><input type="text" id="inpAptVergi"></div>
+            </div>
+            <hr>
+            <h4 style="margin: 10px 0; color: #004085;">Banka & İletişim</h4>
+            <label>Banka Şubesi:</label><input type="text" id="inpAptBanka">
+            <label>Hesap Adı:</label><input type="text" id="inpAptHesapAd">
+            <label>IBAN:</label><input type="text" id="inpAptIban">
+            <label>Adres:</label><input type="text" id="inpAptAdr">
+            <div class="modal-butonlar">
+                <button class="btn-danger" style="width: 45%;" onclick="modalKapat('modalApartmanBilgi')">İptal</button>
+                <button class="btn-success" style="width: 55%;" onclick="apartmanBilgiKaydet()">💾 Bilgileri Güncelle</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEkButce" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>Yeni Ek Bütçe Tanımla</h3>
+            <label>Bütçe Adı:</label><input type="text" id="modalButceAdi" placeholder="Örn: Asansör Bakımı">
+            <label>Taksit Sayısı:</label><input type="number" id="modalTaksitSayisi" min="1" value="1">
+            <div class="modal-butonlar">
+                <button class="btn-danger" onclick="modalKapat('modalEkButce')">Vazgeç</button>
+                <button class="btn-success" onclick="modalEkButceKaydet()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalYeniYil" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu">
+            <h3>Yeni Yıl Aç</h3>
+            <label>Yıl:</label><input type="number" id="modalYilGirdisi" placeholder="Örn: 2027">
+            <div class="modal-butonlar">
+                <button class="btn-danger" onclick="modalKapat('modalYeniYil')">İptal</button>
+                <button class="btn-success" onclick="modalYeniYilKaydet()">💾 Yılı Aç</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHATSAPP BİLDİRİM MODALİ -->
+    <div id="modalWhatsapp" class="modal-arkaplan hidden no-print">
+        <div class="wa-modal-kutu">
+            <!-- Başlık -->
+            <div class="wa-modal-baslik">
+                <h3>💬 WhatsApp Borç Bildirimi</h3>
+                <button class="wa-modal-kapat-btn" onclick="modalKapat('modalWhatsapp')" title="Kapat">✕</button>
+            </div>
+            <!-- Mesaj Şablonu -->
+            <div class="wa-sablon-alani">
+                <label>✏️ Mesaj Şablonu</label>
+                <textarea id="waMessajSablonu" class="wa-mesaj-alani"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                    <div class="wa-degiskenler">
+                        <b>{AD}</b> <b>{DAIRE}</b> <b>{BORC}</b> <b>{APARTMAN}</b> <b>{AYLAR}</b>
+                    </div>
+                </div>
+            </div>
+            <!-- Özet -->
+            <div id="waOzet" class="wa-ozet"></div>
+            <!-- Liste -->
+            <div class="wa-liste-alani" id="waListesi"></div>
+            <!-- Footer -->
+            <div class="wa-modal-footer" id="waFooterNormal">
+                <button class="wa-btn-kapat" onclick="modalKapat('modalWhatsapp')">✕ Kapat</button>
+                <button class="wa-btn-gonder" onclick="waGonderimBaslat()">📲 Sırayla Gönder</button>
+            </div>
+            <div class="wa-modal-footer" id="waFooterSirali" style="display:none;">
+                <div class="wa-siralı-panel">
+                    <div class="wa-siralı-ilerleme">
+                        <span id="waSiraliSayac" style="font-size:12px; font-weight:700; color:#64748b; white-space:nowrap;"></span>
+                        <div class="wa-siralı-ilerleme-bar"><div class="wa-siralı-ilerleme-bar-ic" id="waSiraliBar"></div></div>
+                        <button class="wa-btn-iptal" onclick="waGonderimBitir()">✕ İptal</button>
+                    </div>
+                    <div class="wa-siralı-kisi" id="waSiraliKisi"></div>
+                    <div class="wa-siralı-butonlar">
+                        <button class="wa-btn-ac" onclick="waGonderimAc()">📲 WhatsApp'ta Aç</button>
+                        <button class="wa-btn-sonraki" id="waBtnSonraki" onclick="waGonderimSonraki()">✓ Gönderildi, Sonraki →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SMS BİLDİRİM MODALİ -->
+    <div id="modalSms" class="modal-arkaplan hidden no-print">
+        <div class="sms-modal-kutu">
+            <!-- Başlık -->
+            <div class="sms-modal-baslik">
+                <h3>📱 VatanSMS — Borç Bildirimi</h3>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="sms-api-toggle-btn" id="smsApiToggleBtn" onclick="smsApiToggle()" title="API Ayarları">⚙️ API Ayarları</button>
+                    <button class="sms-modal-kapat-btn" onclick="modalKapat('modalSms')" title="Kapat">✕</button>
+                </div>
+            </div>
+            <!-- API Bilgileri (gizlenebilir) -->
+            <div class="sms-api-alani" id="smsApiAlani" style="display:none;">
+                <div class="sms-api-row">
+                    <div class="col"><label>API ID:</label><input type="text" id="smsApiId" placeholder="VatanSMS API ID" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
+                    <div class="col"><label>API KEY:</label><input type="password" id="smsApiKey" placeholder="VatanSMS API Key" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
+                    <div class="col"><label>Gönderici Adı:</label><input type="text" id="smsSender" placeholder="APTMAN" maxlength="11" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
+                </div>
+                <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+                    <span id="smsApiKayitDurumu" style="font-size:11px; color:#16a34a; font-weight:600;"></span>
+                    <button onclick="smsApiBilgileriniSil()" style="font-size:11px; color:#ef4444; background:none; border:none; cursor:pointer; padding:2px 6px; text-decoration:underline; font-weight:600;" title="Kayıtlı API bilgilerini sil">Bilgileri Sil</button>
+                </div>
+            </div>
+            <!-- Mesaj Şablonu -->
+            <div class="sms-sablon-alani">
+                <label>✏️ Mesaj Şablonu</label>
+                <textarea id="smsMessajSablonu" class="sms-mesaj-alani" oninput="smsKarakterSay()"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                    <div class="sms-degiskenler">
+                        <b>{AD}</b> <b>{DAIRE}</b> <b>{BORC}</b> <b>{APARTMAN}</b> <b>{AYLAR}</b>
+                    </div>
+                    <div class="sms-karakter-sayaci" id="smsKaracterSayac">0 karakter (1 SMS)</div>
+                </div>
+            </div>
+            <!-- Özet -->
+            <div id="smsOzet" class="sms-ozet"></div>
+            <!-- Liste -->
+            <div class="sms-liste-alani" id="smsListesi"></div>
+            <!-- Footer -->
+            <div class="sms-modal-footer">
+                <button class="sms-btn-kapat" onclick="modalKapat('modalSms')">✕ Kapat</button>
+                <button class="sms-btn-gonder" id="smsTumGonderBtn" onclick="smsTumGonder()">📱 Seçilenlere SMS Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÖZEL ONAY / BİLDİRİM MODALİ -->
+    <div id="modalOnay" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu" style="max-width:420px; text-align:center;">
+            <div id="onayIkon" style="font-size:48px; margin-bottom:10px;"></div>
+            <h3 id="onayBaslik" style="margin-top:0;"></h3>
+            <p id="onayMesaj" style="color:#555; font-size:14px; line-height:1.6; white-space:pre-wrap;"></p>
+            <div class="modal-butonlar" id="onayButonlar" style="justify-content:center; gap:12px; margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <div id="anaMenuPaneli" class="container no-print">
+        <div class="ana-header">
+            <h2 id="anaBaslik">🏢 Apartman Yönetim Sistemi</h2>
+            <div class="ana-header-aksiyonlar">
+                <div id="senkronDurum" class="durum-etiketi durum-bekliyor">Bulut senkron bekleniyor...</div>
+                <button onclick="verileriYedekle()" class="btn-koyu-mavi">💾 Yedekle</button>
+                <button onclick="document.getElementById('yedekDosyasi').click()" class="btn-koyu-mavi">📂 Yükle</button>
+                <button onclick="cikisYap()" class="btn-geri" style="width:auto;">Çıkış Yap</button>
+                <button onclick="sistemiSifirla()" class="btn-danger">🗑️ Verileri Sil</button>
+                <input type="file" id="yedekDosyasi" accept=".json" style="display: none;" onchange="yedektenYukle(event)">
+            </div>
+        </div>
+        <div class="menu-grid" id="dinamikMenuKutusu">
+            <button class="menu-karti" style="background-color: #17a2b8;" onclick="ekranDegistir('apartmanDetayPaneli')">🏢 Apartman Bilgileri</button>
+            <button class="menu-karti" onclick="ekranDegistir('sakinBilgileriPaneli')">👥 Sakin Bilgileri</button>
+            <button class="menu-karti" onclick="ekranDegistir('yoneticiPaneli')">📘 İşletme Defteri</button>
+            <button class="menu-karti" onclick="ekranDegistir('aidatTakibiPaneli')">📅 Aidat Takibi</button>
+            <button class="menu-karti" onclick="ekranDegistir('aidatAyarlariPaneli')">⚙️ Bina & Aidat Ayarları</button>
+            <button class="menu-karti" style="background-color: #6f42c1;" onclick="modalAc('modalYeniYil')">📅 Yeni Yıl Aç</button>
+            <button class="menu-karti" onclick="modalAc('modalEkButce')" id="btnEkButceEkle">➕ Ek Bütçe Ekle</button>
+        </div>
+    </div>
+
+    <div id="apartmanDetayPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>🏢 Apartman Kimlik Kartı</h2>
+            <div class="btn-grup">
+                <button onclick="window.print()" class="btn-koyu-mavi">📄 Yazdır / PDF</button>
+                <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri">⬅ Ana Menü</button>
+            </div>
+        </div>
+        <div id="aptKart" style="background: #f8fafc; border: 2px solid #1e40af; border-radius: 14px; padding: 28px; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #dbeafe; padding-bottom: 14px; margin-bottom: 20px;">
+                <div><h1 id="detayAptAd" style="margin: 0; color: #1e40af; font-size:24px; font-weight:700;">---</h1><small id="detayUnvan" style="font-weight:600; color:#64748b;"></small></div>
+                <button class="btn-koyu-mavi no-print" style="width: auto;" onclick="apartmanBilgiModalAc()">✎ Düzenle</button>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h4 style="color:#1e40af; border-bottom:1px solid #dbeafe; padding-bottom:6px; margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em;">Yönetim Kadrosu</h4>
+                    <strong>Yönetici:</strong> <span id="detayYon">---</span><br><strong>Yardımcı:</strong> <span id="detayYonYar">---</span>
+                </div>
+                <div class="col">
+                    <h4 style="color:#1e40af; border-bottom:1px solid #dbeafe; padding-bottom:6px; margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em;">Resmi Bilgiler</h4>
+                    <strong>V.Dairesi:</strong> <span id="detayVergiDaire">---</span><br><strong>V.No:</strong> <span id="detayVergi">---</span>
+                </div>
+                <div class="col">
+                    <h4 style="color:#1e40af; border-bottom:1px solid #dbeafe; padding-bottom:6px; margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em;">Banka Bilgileri</h4>
+                    <strong>Banka/Şube:</strong> <span id="detayBanka">---</span><br><strong>Hesap:</strong> <span id="detayHesapAd">---</span><br><strong>IBAN:</strong> <span id="detayIban" style="font-family:monospace; font-weight:700; color:#1e40af;">---</span>
+                </div>
+            </div>
+            <div style="margin-top:15px; border-top:1px solid #dbeafe; padding-top:12px;"><strong>Adres:</strong> <span id="detayAdr">---</span></div>
+        </div>
+    </div>
+
+    <div id="sakinBilgileriPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>👥 Sakin Bilgileri</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="no-print giris-formu">
+            <div class="row">
+                <div class="col"><label>Bölüm:</label><select id="sakinDaireSecimi"></select></div>
+                <div class="col"><label>Ad Soyad:</label><input type="text" id="sakinAdSoyad"></div>
+                <div class="col"><label>Telefon:</label><input type="text" id="sakinTelefon"></div>
+                <div class="col"><label>E-Posta:</label><input type="text" id="sakinEposta"></div>
+                <div class="col"><label>&nbsp;</label><button class="btn-success" onclick="sakinBilgisiniKaydet()">💾 Kaydet</button></div>
+            </div>
+        </div>
+        <table><thead><tr><th>Bölüm</th><th>Ad Soyad</th><th>Telefon</th><th>E-Posta</th><th class="no-print">İşlem</th></tr></thead><tbody id="sakinlerTablosuGövdesi"></tbody></table>
+    </div>
+
+    <div id="yoneticiPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>📘 İşletme Defteri</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="yil-paneli no-print">
+            <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:130px;"></select>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button onclick="topluOdemeModalAc()" class="btn-success" style="width:auto;">💰 Toplu Ödeme</button>
+                <button onclick="araDonemiModalAc()" class="btn-success" style="width:auto;">📅 Ara Dönem</button>
+                <button onclick="window.print()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
+                <button onclick="exceleAktar()" class="btn-koyu-mavi" style="width:auto;">📊 Excel</button>
+            </div>
+        </div>
+        <div class="no-print giris-formu">
+            <div class="row">
+                <div class="col" style="min-width: 120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
+                <div class="col" style="min-width: 80px;"><label>Tür:</label><select id="islemTuru" onchange="formuDuzenle()"><option value="Gelir">Gelir</option><option value="Gider">Gider</option></select></div>
+                <div class="col" id="daireKutusu"><label>Bölüm:</label><select id="ilgiliDaire"></select></div>
+                <div class="col" id="ayKutusu"><label>Kalem:</label><select id="ilgiliAySecimi"></select></div>
+                <div class="col hidden" id="giderTuruKutusu"><label>Gider Türü:</label><select id="giderTuruSecimi"></select></div>
+                <div class="col"><label>Tutar:</label><input type="number" id="islemTutari"></div>
+                <div class="col"><label>Açıklama:</label><input type="text" id="islemAciklamasi"></div>
+                <div class="col"><label>&nbsp;</label><button class="btn-success" onclick="islemEkle()">➕ Ekle</button></div>
+            </div>
+        </div>
+        <div class="arama-bar no-print">
+            <label>🔍 Ara:</label>
+            <input type="text" id="defterArama" placeholder="Bölüm, açıklama veya kalem..." oninput="aramaYap()">
+            <button onclick="aramayiTemizle()" class="btn-geri" style="width:auto; padding:7px 12px;">✕ Temizle</button>
+        </div>
+        <div class="defter-satiri">
+            <div class="defter-sutunu">
+                <h3>GİDERLER</h3>
+                <table><thead><tr><th style="width:32px">No</th><th style="width:78px">Tarih</th><th>Tür</th><th>Açıklama</th><th style="width:95px">Tutar</th><th class="no-print" style="width:52px">İşlem</th></tr></thead><tbody id="giderlerTablosu"></tbody></table>
+            </div>
+            <div class="defter-sutunu">
+                <h3>GELİRLER</h3>
+                <table><thead><tr><th style="width:32px">No</th><th style="width:78px">Tarih</th><th>Bölüm</th><th>Açıklama</th><th style="width:95px">Tutar</th><th class="no-print" style="width:52px">İşlem</th></tr></thead><tbody id="gelirlerTablosu"></tbody></table>
+            </div>
+        </div>
+        <div class="defter-satiri no-print" style="margin-top:4px; gap:20px;">
+            <div style="flex:1;" id="giderSayfaKontrol" class="sayfa-kontrol"></div>
+            <div style="flex:1;" id="gelirSayfaKontrol" class="sayfa-kontrol"></div>
+        </div>
+        <div class="bakiye-kutusu" id="bakiyeYazisi">KASA: 0 TL</div>
+    </div>
+
+    <div id="aidatTakibiPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2 id="aidatBaslik">📅 Aidat Çizelgesi</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="yil-paneli no-print">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <select id="yilSecimiAidat" onchange="aidatMatrisiniCiz()" style="width:130px;"></select>
+                <select id="gosterimTuru" onchange="aidatMatrisiniCiz()" style="width:160px;"><option value="daire">Daire No</option><option value="isim">Sakin İsimleri</option></select>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="whatsappModalAc()" class="btn-whatsapp" style="width:auto; padding: 8px 16px;">📲 WhatsApp</button>
+                <button onclick="smsModalAc()" class="btn-koyu-mavi" style="width:auto; padding: 8px 16px;">📱 SMS Gönder</button>
+                <button onclick="window.print()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
+            </div>
+        </div>
+        <h2 id="aidatBaslikPrint" class="print-only" style="text-align:center; color:#1e40af; margin-bottom:10px;"></h2>
+        <table class="matris-tablo" id="aidatTablosu"></table>
+    </div>
+
+    <div id="aidatAyarlariPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>⚙️ Bina & Aidat Ayarları</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="no-print giris-formu" style="margin-bottom:16px;">
+            <div style="display: flex; gap: 10px; align-items:flex-end;">
+                <div style="flex:1;"><label style="display:block; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.02em; margin-bottom:4px;">Yeni Bölüm Adı</label><input type="text" id="yeniDaireAdi" placeholder="Daire No / Dükkan No" style="margin:0;"></div>
+                <button onclick="yeniDaireEkle()" class="btn-koyu-mavi" style="width:160px; margin:0;">➕ Bölüm Ekle</button>
+            </div>
+        </div>
+        <div class="yil-paneli"><select id="yilSecimiAyarlar" onchange="aidatAyarlariniEkranaGetir()" style="width:130px;"></select></div>
+        <div class="ayarlar-grid" id="ayarlarGridKutusu"></div>
+        <button class="btn-success" style="margin-top:20px;" onclick="aidatAyarlariniKaydet()">💾 Aidat Ayarlarını Kaydet</button>
+    </div>
+
+    <div id="ekButcePaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2 id="ekButceBaslik">📋 Ek Bütçe</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="yil-paneli no-print">
+            <select id="yilSecimiEkButce" onchange="ekButceListesiniCiz()" style="width:auto;"></select>
+            <button onclick="ekButceyiSil()" class="btn-danger" style="width: auto;">🗑️ Bu Bütçeyi Sil</button>
+        </div>
+        <table class="matris-tablo" id="ekButceTablosu"></table>
+    </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // ── ÖZEL ONAY & BİLDİRİM SİSTEMİ ──────────────────────────────
+        function onayla({ baslik, mesaj, ikon = '❓', onayMetin = 'Evet, Devam Et', iptalMetin = 'İptal', onayRenk = '#dc3545' } = {}, geriCagir) {
+            document.getElementById('onayIkon').textContent = ikon;
+            document.getElementById('onayBaslik').textContent = baslik;
+            document.getElementById('onayMesaj').textContent = mesaj;
+            let butonlar = document.getElementById('onayButonlar');
+            butonlar.innerHTML = `
+                <button class="btn-geri" style="width:auto; padding:10px 20px;" id="onayIptalBtn">${iptalMetin}</button>
+                <button style="background:${onayRenk}; color:white; width:auto; padding:10px 20px; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" id="onayEvetBtn">${onayMetin}</button>
+            `;
+            document.getElementById('onayIptalBtn').onclick = () => { modalKapat('modalOnay'); };
+            document.getElementById('onayEvetBtn').onclick = () => { modalKapat('modalOnay'); geriCagir(); };
+            modalAc('modalOnay');
+        }
+
+        function bildir({ baslik, mesaj, ikon = 'ℹ️', kapatMetin = 'Tamam' } = {}) {
+            document.getElementById('onayIkon').textContent = ikon;
+            document.getElementById('onayBaslik').textContent = baslik;
+            document.getElementById('onayMesaj').textContent = mesaj;
+            let butonlar = document.getElementById('onayButonlar');
+            butonlar.innerHTML = `
+                <button class="btn-koyu-mavi" style="width:auto; padding:10px 28px;" id="onayKapatBtn">${kapatMetin}</button>
+            `;
+            document.getElementById('onayKapatBtn').onclick = () => modalKapat('modalOnay');
+            modalAc('modalOnay');
+        }
+        // ───────────────────────────────────────────────────────────────
+
+        function paraBiçim(sayi) {
+            return sayi.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+        }
+
+        const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const SMS_API_ID_KEY = 'vatanSmsApiId';
+        const SMS_API_KEY_KEY = 'vatanSmsApiKey';
+        const SMS_SENDER_KEY = 'vatanSmsSender';
+        const VERI_GUNCELLEME_KEY = 'apartmanVeriSonGuncelleme';
+        const UYGULAMA_LOCAL_KEYS = ['aptBilgi','apartmanDaireListesi','apartmanIslemleri','apartmanAidatAyarlari','apartmanEkButceAyarlari','apartmanManuelYillar','apartmanSakinleri',SMS_API_ID_KEY,SMS_API_KEY_KEY,SMS_SENDER_KEY,'vatanSmsSablon',VERI_GUNCELLEME_KEY];
+        let aptBilgi, daireListesi, islemler, aidatAyarlari, ekButceAyarlari, manuelYillar, sakinBilgileri, aktifEkButceAdi;
+        let _supabase = null, _oturum = null, _uygulamaHazir = false, _depoyaYazimAskida = false, _senkronZamanlayici = null, _authDinleyiciKuruldu = false;
+
+        function verileriYukle() {
+            aptBilgi = JSON.parse(localStorage.getItem('aptBilgi')) || { ad: "" };
+            daireListesi = JSON.parse(localStorage.getItem('apartmanDaireListesi')) || ["Daire 1", "Daire 2"];
+            islemler = JSON.parse(localStorage.getItem('apartmanIslemleri')) || [];
+            aidatAyarlari = JSON.parse(localStorage.getItem('apartmanAidatAyarlari')) || {};
+            ekButceAyarlari = JSON.parse(localStorage.getItem('apartmanEkButceAyarlari')) || {};
+            manuelYillar = JSON.parse(localStorage.getItem('apartmanManuelYillar')) || [];
+            sakinBilgileri = JSON.parse(localStorage.getItem('apartmanSakinleri')) || {};
+        }
+
+        function authDurumunuGuncelle(mesaj, tip = 'bilgi') {
+            let el = document.getElementById('authDurum');
+            if (!el) return;
+            el.className = `durum-etiketi durum-${tip}`;
+            el.textContent = mesaj;
+        }
+
+        function senkronDurumunuGuncelle(mesaj, tip = 'bekliyor') {
+            let el = document.getElementById('senkronDurum');
+            if (!el) return;
+            el.className = `durum-etiketi durum-${tip}`;
+            el.textContent = mesaj;
+        }
+
+        function uygulamayiGoster() {
+            document.getElementById('authPaneli').classList.add('hidden');
+            document.getElementById('uygulamaKabugu').classList.remove('hidden');
+        }
+
+        function authPaneliniGoster() {
+            document.getElementById('uygulamaKabugu').classList.add('hidden');
+            document.getElementById('authPaneli').classList.remove('hidden');
+        }
+
+        function yerelVeriZamaniniOku() {
+            return Number(localStorage.getItem(VERI_GUNCELLEME_KEY) || 0) || 0;
+        }
+
+        function veriDegisikliginiIsaretle(zaman = Date.now()) {
+            _depoyaYazimAskida = true;
+            localStorage.setItem(VERI_GUNCELLEME_KEY, String(zaman));
+            _depoyaYazimAskida = false;
+            return zaman;
+        }
+
+        function gecerliYedekVerisiMi(veri) {
+            return !!(veri && Array.isArray(veri.daireListesi) && Array.isArray(veri.islemler));
+        }
+
+        function yedekVeriZamaniniOku(veri) {
+            return Number(veri?.meta?.updatedAt || veri?.updatedAt || 0) || 0;
+        }
+
+        function veriyiYereldeUygula(veri, guncellemeZamani = null) {
+            _depoyaYazimAskida = true;
+            localStorage.setItem('aptBilgi', JSON.stringify(veri.aptBilgi || {}));
+            localStorage.setItem('apartmanDaireListesi', JSON.stringify(veri.daireListesi || []));
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(veri.islemler || []));
+            localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(veri.aidatAyarlari || {}));
+            localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(veri.ekButceAyarlari || {}));
+            localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
+            localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
+            let smsAyarlari = veri.smsAyarlari || {};
+            if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId); else localStorage.removeItem(SMS_API_ID_KEY);
+            if (smsAyarlari.apiKey) localStorage.setItem(SMS_API_KEY_KEY, smsAyarlari.apiKey); else localStorage.removeItem(SMS_API_KEY_KEY);
+            if (smsAyarlari.sender) localStorage.setItem(SMS_SENDER_KEY, smsAyarlari.sender); else localStorage.removeItem(SMS_SENDER_KEY);
+            if (smsAyarlari.sablon) localStorage.setItem('vatanSmsSablon', smsAyarlari.sablon); else localStorage.removeItem('vatanSmsSablon');
+            localStorage.setItem(VERI_GUNCELLEME_KEY, String(guncellemeZamani || yedekVeriZamaniniOku(veri) || Date.now()));
+            _depoyaYazimAskida = false;
+            verileriYukle();
+        }
+
+        function veriPaketiOlustur(guncellemeZamani = null) {
+            let updatedAt = guncellemeZamani || yerelVeriZamaniniOku() || Date.now();
+            return {
+                aptBilgi,
+                daireListesi,
+                islemler,
+                aidatAyarlari,
+                ekButceAyarlari,
+                manuelYillar,
+                sakinBilgileri,
+                smsAyarlari: {
+                    apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
+                    apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
+                    sender: localStorage.getItem(SMS_SENDER_KEY) || '',
+                    sablon: localStorage.getItem('vatanSmsSablon') || ''
+                },
+                meta: { updatedAt }
+            };
+        }
+
+        function yerelVerileriTemizle() {
+            _depoyaYazimAskida = true;
+            UYGULAMA_LOCAL_KEYS.forEach(key => localStorage.removeItem(key));
+            _depoyaYazimAskida = false;
+            verileriYukle();
+        }
+
+        function uygulamaVerisiVarMi() {
+            return UYGULAMA_LOCAL_KEYS.some(key => localStorage.getItem(key));
+        }
+
+        function uygulamaVerisiDegisti(key) {
+            if (_depoyaYazimAskida || !_uygulamaHazir) return;
+            if (key !== '*' && !UYGULAMA_LOCAL_KEYS.includes(key)) return;
+            if (key !== VERI_GUNCELLEME_KEY) veriDegisikliginiIsaretle();
+            bulutaKaydetKuyrukla();
+        }
+
+        function localStorageDinleyicisiniKur() {
+            if (Storage.prototype._apartmanSyncPatch) return;
+            let orijinalSetItem = Storage.prototype.setItem;
+            let orijinalRemoveItem = Storage.prototype.removeItem;
+            let orijinalClear = Storage.prototype.clear;
+            Storage.prototype.setItem = function(key, value) {
+                orijinalSetItem.call(this, key, value);
+                if (this === localStorage) uygulamaVerisiDegisti(key);
+            };
+            Storage.prototype.removeItem = function(key) {
+                orijinalRemoveItem.call(this, key);
+                if (this === localStorage) uygulamaVerisiDegisti(key);
+            };
+            Storage.prototype.clear = function() {
+                orijinalClear.call(this);
+                if (this === localStorage) uygulamaVerisiDegisti('*');
+            };
+            Storage.prototype._apartmanSyncPatch = true;
+        }
+
+        function bulutaKaydetKuyrukla(aninda = false) {
+            if (!_supabase || !_oturum || !_uygulamaHazir) return;
+            clearTimeout(_senkronZamanlayici);
+            senkronDurumunuGuncelle('Buluta kaydediliyor...', 'bekliyor');
+            _senkronZamanlayici = setTimeout(() => {
+                uzakDurumuKaydet().catch(err => {
+                    console.warn('Bulut kayıt hatası:', err.message);
+                    senkronDurumunuGuncelle('Bulut kaydı başarısız', 'hata');
+                });
+            }, aninda ? 120 : 700);
+        }
+
+        async function uzakDurumuKaydet() {
+            if (!_supabase || !_oturum) return;
+            let guncellemeZamani = yerelVeriZamaniniOku() || veriDegisikliginiIsaretle();
+            let payload = veriPaketiOlustur(guncellemeZamani);
+            let { error } = await _supabase.from('app_state').upsert({
+                user_id: _oturum.user.id,
+                payload,
+                updated_at: new Date(guncellemeZamani).toISOString()
+            }, { onConflict: 'user_id' });
+            if (error) throw error;
+            senkronDurumunuGuncelle('Bulut senkron tamam', 'basari');
+        }
+
+        async function uzaktakiVeriyiYukle() {
+            if (!_supabase || !_oturum) return;
+            let yerelZaman = yerelVeriZamaniniOku();
+            let { data, error } = await _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle();
+            if (error) throw error;
+            let uzakZaman = data?.updated_at ? new Date(data.updated_at).getTime() : 0;
+            if (data?.payload && gecerliYedekVerisiMi(data.payload) && uzakZaman >= yerelZaman) {
+                veriyiYereldeUygula(data.payload, uzakZaman);
+                senkronDurumunuGuncelle('Buluttaki veri yüklendi', 'basari');
+                return;
+            }
+            verileriYukle();
+            if (uygulamaVerisiVarMi()) await uzakDurumuKaydet();
+        }
+
+        async function oturumuHazirla(session) {
+            _oturum = session;
+            if (!_oturum) {
+                _uygulamaHazir = false;
+                authPaneliniGoster();
+                authDurumunuGuncelle('Giriş yapın veya yeni hesap oluşturun.', 'bilgi');
+                return;
+            }
+            authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
+            await uzaktakiVeriyiYukle();
+            uygulamayiHazirla();
+            uygulamayiGoster();
+            authDurumunuGuncelle('Giriş başarılı.', 'basari');
+        }
+
+        async function supabaseBaslat() {
+            localStorageDinleyicisiniKur();
+            let cfg = window.SUPABASE_CONFIG || {};
+            if (!window.supabase || !cfg.url || !cfg.anonKey || cfg.url.includes('PROJE_URL') || cfg.anonKey.includes('ANON_KEY')) {
+                authPaneliniGoster();
+                authDurumunuGuncelle('Önce supabase-config.js dosyasını doldurun.', 'hata');
+                return;
+            }
+            _supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
+            if (!_authDinleyiciKuruldu) {
+                _supabase.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'SIGNED_OUT') {
+                        _oturum = null;
+                        _uygulamaHazir = false;
+                        authPaneliniGoster();
+                        authDurumunuGuncelle('Çıkış yapıldı.', 'bilgi');
+                        return;
+                    }
+                    if (session) {
+                        try { await oturumuHazirla(session); }
+                        catch (e) { authDurumunuGuncelle('Veriler yüklenemedi: ' + e.message, 'hata'); }
+                    }
+                });
+                _authDinleyiciKuruldu = true;
+            }
+            let { data, error } = await _supabase.auth.getSession();
+            if (error) {
+                authPaneliniGoster();
+                authDurumunuGuncelle('Oturum okunamadı: ' + error.message, 'hata');
+                return;
+            }
+            await oturumuHazirla(data.session);
+        }
+
+        async function girisYap() {
+            if (!_supabase) return;
+            let email = document.getElementById('girisEposta').value.trim();
+            let password = document.getElementById('girisSifre').value;
+            if (!email || !password) return authDurumunuGuncelle('E-posta ve şifre girin.', 'hata');
+            authDurumunuGuncelle('Giriş yapılıyor...', 'bekliyor');
+            let { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) return authDurumunuGuncelle('Giriş başarısız: ' + error.message, 'hata');
+            authDurumunuGuncelle('Giriş başarılı.', 'basari');
+        }
+
+        async function hesapOlustur() {
+            if (!_supabase) return;
+            let email = document.getElementById('girisEposta').value.trim();
+            let password = document.getElementById('girisSifre').value;
+            if (!email || !password) return authDurumunuGuncelle('Yeni hesap için e-posta ve şifre girin.', 'hata');
+            authDurumunuGuncelle('Hesap oluşturuluyor...', 'bekliyor');
+            let { error } = await _supabase.auth.signUp({ email, password });
+            if (error) return authDurumunuGuncelle('Hesap oluşturulamadı: ' + error.message, 'hata');
+            authDurumunuGuncelle('Hesap oluşturuldu. Gerekirse e-postayı onaylayıp giriş yap.', 'basari');
+        }
+
+        async function cikisYap() {
+            if (!_supabase) return;
+            let { error } = await _supabase.auth.signOut();
+            if (error) {
+                toastGoster('Çıkış yapılamadı: ' + error.message, 'hata');
+                return;
+            }
+            authPaneliniGoster();
+        }
+
+        function uygulamayiHazirla() {
+            verileriYukle();
+            basliklariGuncelle();
+            apartmanBilgiFormunuDoldur();
+            daireSecimKutusunuDoldur();
+            yillariYukle();
+            secenekleriGuncelle();
+            dinamikMenuleriCiz();
+            formuDuzenle();
+            document.getElementById('islemTarihiInput').valueAsDate = new Date();
+            _uygulamaHazir = true;
+        }
+
+        window.onload = function() {
+            supabaseBaslat().catch(err => {
+                console.warn('Supabase başlatma hatası:', err.message);
+                authPaneliniGoster();
+                authDurumunuGuncelle('Başlatılamadı: ' + err.message, 'hata');
+            });
+        };
+
+        function basliklariGuncelle() {
+            let ad = aptBilgi.ad ? aptBilgi.ad + " Yönetim Sistemi" : "Apartman Yönetim Sistemi";
+            document.title = ad;
+            document.getElementById('anaBaslik').innerText = ad;
+            document.getElementById('detayAptAd').innerText = ad;
+            document.getElementById('detayUnvan').innerText = aptBilgi.unvan || "";
+            document.getElementById('detayYon').innerText = aptBilgi.yon || "---";
+            document.getElementById('detayYonYar').innerText = aptBilgi.yonYar || "---";
+            document.getElementById('detayVergiDaire').innerText = aptBilgi.vergiDaire || "---";
+            document.getElementById('detayVergi').innerText = aptBilgi.vergi || "---";
+            document.getElementById('detayBanka').innerText = aptBilgi.banka || "---";
+            document.getElementById('detayHesapAd').innerText = aptBilgi.hesapAd || "---";
+            document.getElementById('detayIban').innerText = aptBilgi.iban || "---";
+            document.getElementById('detayAdr').innerText = aptBilgi.adr || "---";
+        }
+
+        function apartmanBilgiFormunuDoldur() {
+            document.getElementById('inpAptAd').value = aptBilgi.ad || "";
+            document.getElementById('inpAptUnvan').value = aptBilgi.unvan || "";
+            document.getElementById('inpAptYon').value = aptBilgi.yon || "";
+            document.getElementById('inpAptYonYar').value = aptBilgi.yonYar || "";
+            document.getElementById('inpAptVergiDaire').value = aptBilgi.vergiDaire || "";
+            document.getElementById('inpAptVergi').value = aptBilgi.vergi || "";
+            document.getElementById('inpAptBanka').value = aptBilgi.banka || "";
+            document.getElementById('inpAptHesapAd').value = aptBilgi.hesapAd || "";
+            document.getElementById('inpAptIban').value = aptBilgi.iban || "";
+            document.getElementById('inpAptAdr').value = aptBilgi.adr || "";
+        }
+
+        function apartmanBilgiModalAc() {
+            apartmanBilgiFormunuDoldur();
+            modalAc('modalApartmanBilgi');
+        }
+
+        function ekranDegistir(id) {
+            const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','yoneticiPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
+            paneller.forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id==='yoneticiPaneli') tablolariGuncelle();
+            if(id==='aidatTakibiPaneli') aidatMatrisiniCiz();
+            if(id==='aidatAyarlariPaneli') aidatAyarlariniEkranaGetir();
+            if(id==='sakinBilgileriPaneli') sakinTablosunuDoldur();
+            if(id==='ekButcePaneli') ekButceListesiniCiz();
+        }
+
+        function modalAc(id) { document.getElementById(id).classList.remove('hidden'); }
+        function modalKapat(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (id === 'modalWhatsapp') waGonderimBitir();
+        }
+
+        function apartmanBilgiKaydet() {
+            aptBilgi = {
+                ad: document.getElementById('inpAptAd').value.trim(),
+                unvan: document.getElementById('inpAptUnvan').value.trim(),
+                yon: document.getElementById('inpAptYon').value.trim(),
+                yonYar: document.getElementById('inpAptYonYar').value.trim(),
+                vergiDaire: document.getElementById('inpAptVergiDaire').value.trim(),
+                vergi: document.getElementById('inpAptVergi').value.trim(),
+                banka: document.getElementById('inpAptBanka').value.trim(),
+                hesapAd: document.getElementById('inpAptHesapAd').value.trim(),
+                iban: document.getElementById('inpAptIban').value.trim(),
+                adr: document.getElementById('inpAptAdr').value.trim()
+            };
+            localStorage.setItem('aptBilgi', JSON.stringify(aptBilgi));
+            basliklariGuncelle();
+            apartmanBilgiFormunuDoldur();
+            modalKapat('modalApartmanBilgi');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function yillariYukle() {
+            let yil = new Date().getFullYear();
+            let yillar = new Set([yil, ...manuelYillar]);
+            islemler.forEach(i => yillar.add(i.yil));
+            let sirali = Array.from(yillar).sort((a,b) => b-a);
+            ['yilSecimiDefter','yilSecimiAidat','yilSecimiAyarlar','yilSecimiEkButce'].forEach(sId => {
+                let s = document.getElementById(sId);
+                s.innerHTML = sirali.map(y => `<option value="${y}">${y} Yılı</option>`).join('');
+            });
+        }
+
+        function modalYeniYilKaydet() {
+            let yil = parseInt(document.getElementById('modalYilGirdisi').value);
+            if(!yil) { toastGoster('Lütfen geçerli bir yıl girin.', 'hata'); return; }
+            if(manuelYillar.includes(yil)) { toastGoster(yil + ' yılı zaten mevcut.', 'uyari'); return; }
+            manuelYillar.push(yil);
+            localStorage.setItem('apartmanManuelYillar', JSON.stringify(manuelYillar));
+            yillariYukle();
+            document.getElementById('modalYilGirdisi').value = "";
+            modalKapat('modalYeniYil');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function daireSecimKutusunuDoldur() {
+            let defterHtml = '<option value="Diğer">Diğer</option>' + daireListesi.map(d => `<option value="${d}">${d}</option>`).join('');
+            document.getElementById('ilgiliDaire').innerHTML = defterHtml;
+            let normalHtml = daireListesi.map(d => `<option value="${d}">${d}</option>`).join('');
+            document.getElementById('sakinDaireSecimi').innerHTML = normalHtml;
+        }
+
+        function yeniDaireEkle() {
+            let ad = document.getElementById('yeniDaireAdi').value.trim();
+            if(ad && !daireListesi.includes(ad)) {
+                daireListesi.push(ad);
+                localStorage.setItem('apartmanDaireListesi', JSON.stringify(daireListesi));
+                daireSecimKutusunuDoldur();
+                aidatAyarlariniEkranaGetir();
+                document.getElementById('yeniDaireAdi').value = "";
+            bulutaKaydetKuyrukla(true);
+            }
+        }
+
+        function daireSil(ad) {
+            let ilgiliIslemSayisi = islemler.filter(i => i.detay === ad).length;
+            if(ilgiliIslemSayisi > 0) {
+                bildir({
+                    baslik: 'Bölüm Silinemez',
+                    mesaj: `${ad} için kayıtlı ${ilgiliIslemSayisi} işlem bulunduğundan bu bölüm silinemiyor.\n\nÖnce bu bölüme bağlı gelir kayıtlarını düzeltin veya silin.`,
+                    ikon: '⚠️',
+                    kapatMetin: 'Anladım'
+                });
+                return;
+            }
+            onayla({
+                baslik: `"${ad}" Silinsin mi?`,
+                mesaj: 'Bu bölüm ve sakin bilgileri kalıcı olarak silinecek.',
+                ikon: '🏠',
+                onayMetin: 'Evet, Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                daireListesi = daireListesi.filter(d => d !== ad);
+                delete sakinBilgileri[ad];
+                Object.keys(aidatAyarlari).forEach(yil => {
+                    if(aidatAyarlari[yil]) delete aidatAyarlari[yil][ad];
+                });
+                localStorage.setItem('apartmanDaireListesi', JSON.stringify(daireListesi));
+                localStorage.setItem('apartmanSakinleri', JSON.stringify(sakinBilgileri));
+                localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(aidatAyarlari));
+            bulutaKaydetKuyrukla(true);
+                daireSecimKutusunuDoldur();
+                aidatAyarlariniEkranaGetir();
+                sakinTablosunuDoldur();
+                if(daireListesi.length > 0) document.getElementById('sakinDaireSecimi').value = daireListesi[0];
+                else document.getElementById('sakinDaireSecimi').innerHTML = '';
+                document.getElementById('sakinAdSoyad').value = "";
+                document.getElementById('sakinTelefon').value = "";
+                document.getElementById('sakinEposta').value = "";
+                toastGoster(`${ad} bölümü silindi`, 'bilgi');
+            });
+        }
+
+        function islemEkle() {
+            let tur = document.getElementById('islemTuru').value;
+            let tutar = parseFloat(document.getElementById('islemTutari').value);
+            let acik = document.getElementById('islemAciklamasi').value.trim();
+            let yil = parseInt(document.getElementById('yilSecimiDefter').value);
+            let detay = tur === 'Gelir' ? document.getElementById('ilgiliDaire').value : document.getElementById('giderTuruSecimi').value;
+            let ay = tur === 'Gelir' ? document.getElementById('ilgiliAySecimi').value : "";
+            
+            if(!tutar || tutar <= 0) { toastGoster('Lütfen geçerli bir tutar girin.', 'hata'); return; }
+            if(!acik) { toastGoster('Lütfen açıklama girin.', 'hata'); return; }
+
+            // Seçilen tarihi al
+            let secilenTarihRaw = document.getElementById('islemTarihiInput').value;
+            let tarihObj = secilenTarihRaw ? new Date(secilenTarihRaw) : new Date();
+            let formatliTarih = tarihObj.toLocaleDateString('tr-TR');
+
+            islemler.push({ tur, tutar, aciklama: acik, yil, detay, ay, tarih: formatliTarih });
+            islemler.sort((a, b) => {
+                if(a.yil !== b.yil) return a.yil - b.yil;
+                return tarihSirala(a.tarih) - tarihSirala(b.tarih);
+            });
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            tablolariGuncelle();
+            document.getElementById('islemTutari').value = "";
+            document.getElementById('islemAciklamasi').value = "";
+            toastGoster('İşlem eklendi ✓', 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function tarihSirala(tarih) {
+            if (!tarih) return 0;
+            let p = tarih.split('.');
+            if (p.length === 3) return parseInt(p[2]) * 10000 + parseInt(p[1]) * 100 + parseInt(p[0]);
+            return 0;
+        }
+
+        let gelirSayfa = 1, giderSayfa = 1;
+        const SAYFA_BOYUTU = 25;
+
+        function aramaYap() { gelirSayfa = 1; giderSayfa = 1; tablolariGuncelle(); }
+        function aramayiTemizle() { document.getElementById('defterArama').value = ''; aramaYap(); }
+        function sayfaDegistir(tur, delta) {
+            if(tur === 'gelir') gelirSayfa = Math.max(1, gelirSayfa + delta);
+            else giderSayfa = Math.max(1, giderSayfa + delta);
+            tablolariGuncelle();
+        }
+        function sayfaKontrolGuncelle(elemId, sayfa, maxSayfa, toplam, tur) {
+            let el = document.getElementById(elemId);
+            if(!el) return;
+            if(toplam === 0 || maxSayfa <= 1) { el.innerHTML = ''; return; }
+            el.innerHTML = `<button onclick="sayfaDegistir('${tur}',-1)" ${sayfa<=1?'disabled':''} class="btn-koyu-mavi">◀</button>
+                <span>Sayfa <b>${sayfa}</b> / ${maxSayfa} &nbsp;·&nbsp; ${toplam} kayıt</span>
+                <button onclick="sayfaDegistir('${tur}',1)" ${sayfa>=maxSayfa?'disabled':''} class="btn-koyu-mavi">▶</button>`;
+        }
+
+        function tablolariGuncelle() {
+            let yil = parseInt(document.getElementById('yilSecimiDefter').value);
+            let arama = (document.getElementById('defterArama')?.value || '').toLowerCase().trim();
+            let dev = 0, tGel = 0, tGid = 0;
+            islemler.forEach(is => { if(is.yil < yil) dev += (is.tur === 'Gelir' ? is.tutar : -is.tutar); });
+            let yilIslemleri = islemler.map((is, idx) => ({...is, origIdx: idx})).filter(is => is.yil === yil);
+            yilIslemleri.sort((a, b) => tarihSirala(a.tarih) - tarihSirala(b.tarih));
+            let filtreli = arama ? yilIslemleri.filter(is =>
+                (is.detay||'').toLowerCase().includes(arama) ||
+                (is.aciklama||'').toLowerCase().includes(arama) ||
+                (is.ay||'').toLowerCase().includes(arama)
+            ) : yilIslemleri;
+
+            let gelirler = filtreli.filter(is => is.tur === 'Gelir');
+            let giderler = filtreli.filter(is => is.tur === 'Gider');
+            gelirler.forEach(is => tGel += is.tutar);
+            giderler.forEach(is => tGid += is.tutar);
+
+            let gelMax = Math.max(1, Math.ceil(gelirler.length / SAYFA_BOYUTU));
+            let gidMax = Math.max(1, Math.ceil(giderler.length / SAYFA_BOYUTU));
+            gelirSayfa = Math.min(gelirSayfa, gelMax);
+            giderSayfa = Math.min(giderSayfa, gidMax);
+
+            let gelSayfa = gelirler.slice((gelirSayfa-1)*SAYFA_BOYUTU, gelirSayfa*SAYFA_BOYUTU);
+            let gidSayfa = giderler.slice((giderSayfa-1)*SAYFA_BOYUTU, giderSayfa*SAYFA_BOYUTU);
+            let gelBas = (gelirSayfa-1)*SAYFA_BOYUTU, gidBas = (giderSayfa-1)*SAYFA_BOYUTU;
+
+            let gelHtml = "", gidHtml = "";
+            let islemBtn = (idx) => `<div style="display:flex;flex-direction:column;gap:2px;align-items:center;"><button class="btn-duzenle" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemDuzenle(${idx})" title="Düzenle">✎</button><button class="btn-danger" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemSil(${idx})" title="Sil">✕</button></div>`;
+            gelSayfa.forEach((is, i) => { gelHtml += `<tr><td>${gelBas+i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td><td class="no-print" style="white-space:nowrap">${islemBtn(is.origIdx)}</td></tr>`; });
+            gidSayfa.forEach((is, i) => { gidHtml += `<tr><td>${gidBas+i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td><td class="no-print" style="white-space:nowrap">${islemBtn(is.origIdx)}</td></tr>`; });
+
+            if(gelirler.length > 0) gelHtml += `<tr style="background-color:#d4edda;font-weight:bold;"><td colspan="4" style="text-align:right;padding-right:10px;">TOPLAM (${gelirler.length} kayıt)</td><td style="white-space:nowrap;">${paraBiçim(tGel)}</td><td class="no-print"></td></tr>`;
+            if(giderler.length > 0) gidHtml += `<tr style="background-color:#f8d7da;font-weight:bold;"><td colspan="4" style="text-align:right;padding-right:10px;">TOPLAM (${giderler.length} kayıt)</td><td style="white-space:nowrap;">${paraBiçim(tGid)}</td><td class="no-print"></td></tr>`;
+
+            document.getElementById('gelirlerTablosu').innerHTML = gelHtml;
+            document.getElementById('giderlerTablosu').innerHTML = gidHtml;
+            document.getElementById('bakiyeYazisi').innerText = `DEVREDEN: ${paraBiçim(dev)} | KASA: ${paraBiçim(dev + tGel - tGid)}`;
+            sayfaKontrolGuncelle('gelirSayfaKontrol', gelirSayfa, gelMax, gelirler.length, 'gelir');
+            sayfaKontrolGuncelle('giderSayfaKontrol', giderSayfa, gidMax, giderler.length, 'gider');
+        }
+
+        function islemSil(i) {
+            onayla({
+                baslik: 'İşlemi Sil',
+                mesaj: 'Bu işlem kalıcı olarak silinecektir. Emin misiniz?',
+                ikon: '🗑️',
+                onayMetin: 'Evet, Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                islemler.splice(i,1);
+                localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+                tablolariGuncelle();
+                toastGoster('İşlem silindi', 'bilgi');
+            bulutaKaydetKuyrukla(true);
+            });
+        }
+
+        function islemDuzenle(idx) {
+            let is = islemler[idx];
+            if(!is) return;
+            document.getElementById('duzenleIdx').value = idx;
+            let p = is.tarih ? is.tarih.split('.') : [];
+            let tarihInput = p.length === 3 ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}` : '';
+            document.getElementById('duzenleTarih').value = tarihInput;
+            document.getElementById('duzenleTur').value = is.tur;
+            document.getElementById('duzenleTutar').value = is.tutar;
+            document.getElementById('duzenleAciklama').value = is.aciklama;
+            // Doldur seçim kutularını
+            let dDaire = document.getElementById('duzenleDaire');
+            dDaire.innerHTML = daireListesi.map(d=>`<option value="${d}">${d}</option>`).join('');
+            let dAy = document.getElementById('duzenleAy');
+            dAy.innerHTML = document.getElementById('ilgiliAySecimi').innerHTML;
+            let dGider = document.getElementById('duzenleGiderTuru');
+            dGider.innerHTML = document.getElementById('giderTuruSecimi').innerHTML;
+            duzenleFormuGuncelle();
+            if(is.tur === 'Gelir') { dDaire.value = is.detay; dAy.value = is.ay; }
+            else dGider.value = is.detay;
+            modalAc('modalIslemDuzenle');
+        }
+
+        function duzenleFormuGuncelle() {
+            let tur = document.getElementById('duzenleTur').value;
+            document.getElementById('duzenleDaireKutu').className = tur==='Gelir' ? 'col' : 'col hidden';
+            document.getElementById('duzenleAyKutu').className = tur==='Gelir' ? 'col' : 'col hidden';
+            document.getElementById('duzenleGiderKutu').className = tur==='Gider' ? 'col' : 'col hidden';
+        }
+
+        function duzenleKaydet() {
+            let idx = parseInt(document.getElementById('duzenleIdx').value);
+            let tur = document.getElementById('duzenleTur').value;
+            let tutar = parseFloat(document.getElementById('duzenleTutar').value);
+            let acik = document.getElementById('duzenleAciklama').value.trim();
+            if(!tutar || tutar <= 0) { toastGoster('Geçerli bir tutar girin.', 'hata'); return; }
+            if(!acik) { toastGoster('Açıklama boş olamaz.', 'hata'); return; }
+            let tarihRaw = document.getElementById('duzenleTarih').value;
+            let tarihObj = tarihRaw ? new Date(tarihRaw) : new Date();
+            let tarih = tarihObj.toLocaleDateString('tr-TR');
+            let yil = tarihObj.getFullYear();
+            let detay = tur==='Gelir' ? document.getElementById('duzenleDaire').value : document.getElementById('duzenleGiderTuru').value;
+            let ay = tur==='Gelir' ? document.getElementById('duzenleAy').value : "";
+            islemler[idx] = { tur, tutar, aciklama: acik, yil, detay, ay, tarih };
+            islemler.sort((a,b) => { if(a.yil!==b.yil) return a.yil-b.yil; return tarihSirala(a.tarih)-tarihSirala(b.tarih); });
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            tablolariGuncelle();
+            modalKapat('modalIslemDuzenle');
+            toastGoster('İşlem güncellendi ✓', 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function aidatMatrisiniCiz() {
+            let yil = parseInt(document.getElementById('yilSecimiAidat').value);
+            let gTur = document.getElementById('gosterimTuru').value;
+            let bugun = new Date(), bYil = bugun.getFullYear(), bAy = bugun.getMonth();
+            let ayar = aidatAyarlari[yil] || {};
+            let aptAdi = aptBilgi.ad || "";
+            let aidatBaslikMetni = yil + ' Yılı ' + (aptAdi ? aptAdi + ' ' : '') + 'Aidat Çizelgesi';
+            document.getElementById('aidatBaslik').innerText = aidatBaslikMetni;
+            document.getElementById('aidatBaslikPrint').innerText = aidatBaslikMetni;
+            let html = `<thead><tr><th>Bölüm</th>${aylar.map(a => `<th>${a}</th>`).join('')}<th>BORÇ</th></tr></thead><tbody>`;
+            daireListesi.forEach(d => {
+                let baslik = (gTur==='isim' && sakinBilgileri[d]) ? sakinBilgileri[d].ad : d;
+                html += `<tr><td>${baslik}</td>`;
+                let borc = 0;
+                aylar.forEach((ay, idx) => {
+                    let od = islemler.filter(i => i.yil === yil && i.detay === d && i.ay === (ay+" Aidatı")).reduce((s, i) => s + i.tutar, 0);
+                    let ger = ayar[d] || 0;
+                    let gelecek = (yil > bYil || (yil === bYil && idx > bAy));
+                    if(ger === 0) html += `<td><span class="gelecek-ay">-</span></td>`;
+                    else if(od >= ger) html += `<td><span class="durum-kutu odendi">Ödendi</span></td>`;
+                    else if(gelecek) html += `<td><span class="gelecek-ay">-</span></td>`;
+                    else {
+                        let kalan = ger - od;
+                        borc += kalan;
+                        let aciklama = od > 0
+                            ? `${paraBiçim(od)} ödendi, ${paraBiçim(kalan)} kaldı`
+                            : `${paraBiçim(ger)} borç`;
+                        html += `<td><span class="durum-kutu odenmedi" title="${aciklama}">${paraBiçim(kalan)}</span></td>`;
+                    }
+                });
+                html += `<td class="${borc === 0 ? 'borc-sifir' : 'borc-sutun'}">${paraBiçim(borc)}</td></tr>`;
+            });
+            document.getElementById('aidatTablosu').innerHTML = html + "</tbody>";
+        }
+
+        function dinamikMenuleriCiz() {
+            document.querySelectorAll('.dinamik-btn').forEach(b => b.remove());
+            Object.keys(ekButceAyarlari).forEach(ad => {
+                let btn = document.createElement('button');
+                btn.className = "menu-karti dinamik-btn";
+                btn.innerText = "📋 " + ad;
+                btn.onclick = () => { aktifEkButceAdi = ad; ekranDegistir('ekButcePaneli'); };
+                document.getElementById('dinamikMenuKutusu').insertBefore(btn, document.getElementById('btnEkButceEkle'));
+            });
+        }
+
+        function modalEkButceKaydet() {
+            let ad = document.getElementById('modalButceAdi').value.trim();
+            let tak = parseInt(document.getElementById('modalTaksitSayisi').value);
+            if(ad) {
+                ekButceAyarlari[ad] = { taksit: tak };
+                localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(ekButceAyarlari));
+                secenekleriGuncelle(); dinamikMenuleriCiz(); modalKapat('modalEkButce');
+                bulutaKaydetKuyrukla(true);
+            }
+        }
+
+        function ekButceListesiniCiz() {
+            if(!aktifEkButceAdi || !ekButceAyarlari[aktifEkButceAdi]) return;
+            let yil = parseInt(document.getElementById('yilSecimiEkButce').value);
+            let ayar = ekButceAyarlari[aktifEkButceAdi];
+            document.getElementById('ekButceBaslik').innerText = aktifEkButceAdi;
+            let html = `<thead><tr><th>Bölüm</th>`;
+            for(let t=1; t<=ayar.taksit; t++) html += `<th>${t}. Taksit</th>`;
+            html += `</tr></thead><tbody>`;
+            daireListesi.forEach(d => {
+                html += `<tr><td>${d}</td>`;
+                for(let t=1; t<=ayar.taksit; t++) {
+                    let kalem = `${aktifEkButceAdi} - ${t}. Taksit`;
+                    let od = islemler.filter(i => i.yil === yil && i.detay === d && i.ay === kalem).reduce((s, i) => s + i.tutar, 0);
+                    let icerik = od > 0 ? paraBiçim(od) : "-";
+                    html += `<td><span class="durum-kutu ${od > 0 ? 'odendi' : 'odenmedi'}">${icerik}</span></td>`;
+                }
+                html += `</tr>`;
+            });
+            document.getElementById('ekButceTablosu').innerHTML = html + "</tbody>";
+        }
+
+        function ekButceyiSil() {
+            onayla({
+                baslik: `"${aktifEkButceAdi}" Silinsin mi?`,
+                mesaj: 'Bu ek bütçe ve tüm taksit tanımları kalıcı olarak silinecek.',
+                ikon: '📋',
+                onayMetin: 'Evet, Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                delete ekButceAyarlari[aktifEkButceAdi];
+                localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(ekButceAyarlari));
+                dinamikMenuleriCiz();
+                ekranDegistir('anaMenuPaneli');
+                bulutaKaydetKuyrukla(true);
+                toastGoster('Ek bütçe silindi', 'bilgi');
+            });
+        }
+
+        function aidatAyarlariniEkranaGetir() {
+            let yil = document.getElementById('yilSecimiAyarlar').value;
+            let ayar = aidatAyarlari[yil] || {};
+            document.getElementById('ayarlarGridKutusu').innerHTML = daireListesi.map(d => `<div class="ayar-kutu"><div style="display:flex; justify-content:space-between"><strong>${d}</strong><button class="btn-danger" style="width:auto; padding:2px 5px" onclick="daireSil('${d}')">X</button></div><input type="number" id="ayar_${d}" value="${ayar[d] || ''}"></div>`).join('');
+        }
+
+        function aidatAyarlariniKaydet() {
+            let yil = document.getElementById('yilSecimiAyarlar').value;
+            aidatAyarlari[yil] = {};
+            daireListesi.forEach(d => aidatAyarlari[yil][d] = parseInt(document.getElementById('ayar_'+d).value) || 0);
+            localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(aidatAyarlari));
+            if(!document.getElementById('aidatTakibiPaneli').classList.contains('hidden')) aidatMatrisiniCiz();
+            bulutaKaydetKuyrukla(true);
+            toastGoster('Aidat ayarları kaydedildi ✓', 'basari');
+        }
+
+        function sakinTablosunuDoldur() {
+            document.getElementById('sakinlerTablosuGövdesi').innerHTML = daireListesi.map(d => {
+                let s = sakinBilgileri[d] || { ad: "-", tel: "-", eposta: "-" };
+                return `<tr><td>${d}</td><td>${s.ad}</td><td>${s.tel}</td><td>${s.eposta}</td><td class="no-print"><button class="btn-duzenle" onclick="sakinDuzenle('${d}')">✎</button></td></tr>`;
+            }).join('');
+        }
+
+        function sakinBilgisiniKaydet() {
+            let d = document.getElementById('sakinDaireSecimi').value;
+            if(!d) {
+                toastGoster('Önce en az bir bölüm ekleyin.', 'hata');
+                return;
+            }
+            sakinBilgileri[d] = {
+                ad: document.getElementById('sakinAdSoyad').value.trim(),
+                tel: document.getElementById('sakinTelefon').value.trim(),
+                eposta: document.getElementById('sakinEposta').value.trim()
+            };
+            localStorage.setItem('apartmanSakinleri', JSON.stringify(sakinBilgileri));
+            sakinTablosunuDoldur();
+            if(!document.getElementById('aidatTakibiPaneli').classList.contains('hidden')) aidatMatrisiniCiz();
+            toastGoster('Sakin bilgisi kaydedildi ✓', 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+
+        function sakinDuzenle(d) {
+            let s = sakinBilgileri[d] || { ad: "", tel: "", eposta: "" };
+            document.getElementById('sakinDaireSecimi').value = d;
+            document.getElementById('sakinAdSoyad').value = s.ad;
+            document.getElementById('sakinTelefon').value = s.tel;
+            document.getElementById('sakinEposta').value = s.eposta;
+        }
+
+        function secenekleriGuncelle() {
+            let h = '<option value="Diğer">Daire Ödemesi (Diğer)</option>' + aylar.map(a => `<option value="${a} Aidatı">${a} Aidatı</option>`).join('');
+            Object.keys(ekButceAyarlari).forEach(ad => { for(let t=1; t<=ekButceAyarlari[ad].taksit; t++) h += `<option value="${ad} - ${t}. Taksit">${ad} - ${t}. Taksit</option>`; });
+            document.getElementById('ilgiliAySecimi').innerHTML = h;
+            let g = ["Elektrik", "Su", "Temizlik", "Asansör", "Tamir", "Diğer"].map(x => `<option value="${x} Gideri">${x} Gideri</option>`).join('');
+            Object.keys(ekButceAyarlari).forEach(ad => g += `<option value="${ad} Gideri">${ad} Gideri</option>`);
+            document.getElementById('giderTuruSecimi').innerHTML = g;
+        }
+
+        function formuDuzenle() {
+            let t = document.getElementById('islemTuru').value;
+            document.getElementById('daireKutusu').className = t==='Gelir' ? 'col' : 'col hidden';
+            document.getElementById('ayKutusu').className = t==='Gelir' ? 'col' : 'col hidden';
+            document.getElementById('giderTuruKutusu').className = t==='Gider' ? 'col' : 'col hidden';
+        }
+
+        function whatsappModalAc() {
+            let yil = parseInt(document.getElementById('yilSecimiAidat').value);
+            // Varsayılan mesaj şablonu
+            let sablon = `Sayın {AD},\n\n{APARTMAN} için {BORC} tutarında aidat borcunuz bulunmaktadır.\nBorçlu aylar: {AYLAR}\n\nLütfen en kısa sürede ödemenizi yapınız.\n\nSaygılarımızla,\nApartman Yönetimi`;
+            document.getElementById('waMessajSablonu').value = sablon;
+            waListesiniCiz(yil);
+            modalAc('modalWhatsapp');
+        }
+
+        function borcluSakinleriHesapla(yil) {
+            let bugun = new Date();
+            let bYil = bugun.getFullYear();
+            let bAy = bugun.getMonth();
+            let ayar = aidatAyarlari[yil] || {};
+            let sonuc = [];
+
+            daireListesi.forEach(d => {
+                let sakin = sakinBilgileri[d] || { ad: '-', tel: '', eposta: '' };
+                let borc = 0;
+                let borcluAylar = [];
+
+                aylar.forEach((ay, idx) => {
+                    let ger = ayar[d] || 0;
+                    if(ger === 0) return;
+                    let gelecek = (yil > bYil || (yil === bYil && idx > bAy));
+                    if(gelecek) return;
+                    let od = islemler.filter(i => i.yil === yil && i.detay === d && i.ay === (ay + " Aidatı")).reduce((s, i) => s + i.tutar, 0);
+                    if(od < ger) {
+                        borc += (ger - od);
+                        borcluAylar.push(ay);
+                    }
+                });
+
+                sonuc.push({ daire: d, ad: sakin.ad, tel: sakin.tel, borc, borcluAylar });
+            });
+
+            return sonuc;
+        }
+
+        function waListesiniCiz(yil) {
+            let sakinler = borcluSakinleriHesapla(yil);
+            let borcluSayisi = sakinler.filter(s => s.borc > 0).length;
+            let telliSayisi = sakinler.filter(s => s.borc > 0 && s.tel && s.tel.trim() !== '' && s.tel.trim() !== '-').length;
+            let telSiz = borcluSayisi - telliSayisi;
+
+            document.getElementById('waOzet').innerHTML =
+                `📊 <b>${borcluSayisi}</b> borçlu sakin &nbsp;·&nbsp; <b>${telliSayisi}</b> telefon kayıtlı`
+                + (telSiz > 0 ? ` &nbsp;·&nbsp; <span style="color:#856404;">⚠️ ${telSiz} telefonsuz</span>` : '');
+
+            if(borcluSayisi === 0) {
+                document.getElementById('waListesi').innerHTML = '<div class="wa-bos-mesaj">✅ Tüm sakinler ödemelerini yapmış!</div>';
+                return;
+            }
+
+            let html = `<div class="wa-secim-bar">
+                <label>
+                    <input type="checkbox" id="waHepsiniSec" onchange="waHepsiniToggle(this.checked)">
+                    Tümünü Seç
+                </label>
+                <span class="wa-secili-sayisi" id="waSeciliSayisi">0 seçili</span>
+            </div><div class="wa-kart-grid">`;
+
+            sakinler.filter(s => s.borc > 0).forEach((s, i) => {
+                let telVar = s.tel && s.tel.trim() !== '' && s.tel.trim() !== '-';
+                let borcStr = paraBiçim(s.borc);
+                let aylarStr = s.borcluAylar.join(', ');
+                let cbId = `waChk_${i}`;
+                html += `<div class="wa-kart${!telVar ? ' telefon-yok' : ''}">
+                    <input type="checkbox" id="${cbId}" class="wa-chk" ${!telVar ? 'disabled style="opacity:0.35"' : ''}
+                        data-daire="${s.daire}" data-ad="${s.ad.replace(/"/g,"'")}" data-tel="${s.tel}" data-borc="${borcStr}" data-aylar="${aylarStr}"
+                        onchange="waSecimGuncelle()">
+                    <div class="wa-kart-bilgi">
+                        <div class="wa-kart-ad" title="${s.daire} — ${s.ad}">${s.daire} — ${s.ad}</div>
+                        <div class="wa-kart-satir">
+                            <span class="wa-tel">${telVar ? '📱 ' + s.tel : '⚠️ Telefon yok'}</span>
+                            <span class="wa-borc">💸 ${borcStr}</span>
+                        </div>
+                        <div class="wa-aylar" title="${aylarStr}">📅 ${aylarStr}</div>
+                    </div>
+                    ${telVar
+                        ? `<button class="btn-whatsapp" onclick="tekMesajGonder('${s.daire}','${s.ad.replace(/'/g,"\\'")}','${s.tel}','${borcStr}','${aylarStr}')" title="Tek mesaj gönder">📲</button>`
+                        : `<button class="btn-whatsapp" disabled title="Telefon kaydı yok">📵</button>`
+                    }
+                </div>`;
+            });
+
+            html += '</div>'
+            document.getElementById('waListesi').innerHTML = html;
+            waSecimGuncelle();
+        }
+
+        function waHepsiniToggle(secili) {
+            document.querySelectorAll('.wa-chk:not(:disabled)').forEach(cb => cb.checked = secili);
+            waSecimGuncelle();
+        }
+
+        function waSecimGuncelle() {
+            let seciliSayisi = document.querySelectorAll('.wa-chk:checked').length;
+            let el = document.getElementById('waSeciliSayisi');
+            if(el) el.textContent = seciliSayisi + ' seçili';
+            let hepsiniSec = document.getElementById('waHepsiniSec');
+            if(hepsiniSec) {
+                let toplam = document.querySelectorAll('.wa-chk:not(:disabled)').length;
+                hepsiniSec.indeterminate = seciliSayisi > 0 && seciliSayisi < toplam;
+                hepsiniSec.checked = seciliSayisi === toplam && toplam > 0;
+            }
+        }
+
+        function mesajHazirla(daire, ad, borc, aylarMetni) {
+            let aptAd = aptBilgi.ad || 'Apartmanınız';
+            let sablon = document.getElementById('waMessajSablonu').value;
+            return sablon
+                .replace(/{AD}/g, ad)
+                .replace(/{DAIRE}/g, daire)
+                .replace(/{BORC}/g, borc)
+                .replace(/{AYLAR}/g, aylarMetni || '-')
+                .replace(/{APARTMAN}/g, aptAd);
+        }
+
+        function telTemizle(tel) {
+            // Türk numarası için başındaki 0'ı çıkar, başında + yoksa 90 ekle
+            let t = tel.replace(/\s|-|\(|\)/g, '');
+            if(t.startsWith('0')) t = '90' + t.slice(1);
+            if(!t.startsWith('+') && !t.startsWith('90')) t = '90' + t;
+            t = t.replace('+', '');
+            return t;
+        }
+
+        function tekMesajGonder(daire, ad, tel, borc, aylarMetni) {
+            let mesaj = mesajHazirla(daire, ad, borc, aylarMetni);
+            let temizTel = telTemizle(tel);
+            let url = `https://wa.me/${temizTel}?text=${encodeURIComponent(mesaj)}`;
+            window.open(url, '_blank');
+        }
+
+        function tumBorclularaGonder() {
+            let seciliCheckboxlar = Array.from(document.querySelectorAll('.wa-chk:checked'));
+            if(seciliCheckboxlar.length === 0) {
+                bildir({
+                    baslik: 'Seçim Yapılmadı',
+                    mesaj: 'Lütfen önce mesaj göndermek istediğiniz kişileri listeden seçin.',
+                    ikon: '👆',
+                    kapatMetin: 'Tamam'
+                });
+                return;
+            }
+            onayla({
+                baslik: 'WhatsApp Mesajı Gönder',
+                mesaj: `${seciliCheckboxlar.length} kişiye WhatsApp mesajı açılacak.\n\nDevam etmek için tarayıcının açılır pencere (popup) iznine ihtiyaç duyulabilir.`,
+                ikon: '📲',
+                onayMetin: `Gönder (${seciliCheckboxlar.length} kişi)`,
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#25D366'
+            }, () => {
+                seciliCheckboxlar.forEach((cb, i) => {
+                    setTimeout(() => {
+                        tekMesajGonder(cb.dataset.daire, cb.dataset.ad, cb.dataset.tel, cb.dataset.borc, cb.dataset.aylar);
+                    }, i * 800);
+                });
+            });
+        }
+
+        // ── WHATSAPP SIRALI GÖNDERİM ────────────────────────────────────
+        let _waGonderimListesi = [];
+        let _waGonderimIndex = 0;
+
+        function waGonderimBaslat() {
+            let seciliCheckboxlar = Array.from(document.querySelectorAll('.wa-chk:checked'));
+            if (seciliCheckboxlar.length === 0) {
+                bildir({ baslik: 'Seçim Yapılmadı', mesaj: 'Lütfen önce mesaj göndermek istediğiniz kişileri listeden seçin.', ikon: '👆', kapatMetin: 'Tamam' });
+                return;
+            }
+            _waGonderimListesi = seciliCheckboxlar.map(cb => ({
+                daire: cb.dataset.daire, ad: cb.dataset.ad,
+                tel: cb.dataset.tel, borc: cb.dataset.borc, aylar: cb.dataset.aylar
+            }));
+            _waGonderimIndex = 0;
+            document.getElementById('waFooterNormal').style.display = 'none';
+            document.getElementById('waFooterSirali').style.display = '';
+            waGonderimAdimGoster();
+        }
+
+        function waGonderimAdimGoster() {
+            let kisi = _waGonderimListesi[_waGonderimIndex];
+            let toplam = _waGonderimListesi.length;
+            let sonMu = _waGonderimIndex === toplam - 1;
+
+            document.getElementById('waSiraliSayac').textContent = `${_waGonderimIndex + 1} / ${toplam}`;
+            document.getElementById('waSiraliBar').style.width = `${((_waGonderimIndex) / toplam) * 100}%`;
+            document.getElementById('waSiraliKisi').innerHTML =
+                `<div class="wa-siralı-kisi-ad">${kisi.daire} — ${kisi.ad}</div>` +
+                `<div class="wa-siralı-kisi-detay">📱 ${kisi.tel} &nbsp;·&nbsp; 💸 ${kisi.borc} &nbsp;·&nbsp; 📅 ${kisi.aylar}</div>`;
+            document.getElementById('waBtnSonraki').textContent = sonMu ? '✓ Tamamlandı' : '✓ Gönderildi, Sonraki →';
+
+            // Aktif kartı listede vurgula
+            document.querySelectorAll('.wa-kart').forEach(k => k.classList.remove('aktif-adim'));
+            let kartlar = document.querySelectorAll('.wa-kart');
+            if (kartlar[_waGonderimIndex]) {
+                kartlar[_waGonderimIndex].classList.add('aktif-adim');
+                kartlar[_waGonderimIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function waGonderimAc() {
+            let kisi = _waGonderimListesi[_waGonderimIndex];
+            tekMesajGonder(kisi.daire, kisi.ad, kisi.tel, kisi.borc, kisi.aylar);
+        }
+
+        function waGonderimSonraki() {
+            if (_waGonderimIndex < _waGonderimListesi.length - 1) {
+                _waGonderimIndex++;
+                waGonderimAdimGoster();
+            } else {
+                document.getElementById('waSiraliBar').style.width = '100%';
+                setTimeout(() => waGonderimBitir(), 300);
+            }
+        }
+
+        function waGonderimBitir() {
+            _waGonderimListesi = [];
+            _waGonderimIndex = 0;
+            document.querySelectorAll('.wa-kart').forEach(k => k.classList.remove('aktif-adim'));
+            document.getElementById('waFooterSirali').style.display = 'none';
+            document.getElementById('waFooterNormal').style.display = '';
+        }
+        // ────────────────────────────────────────────────────────────────
+
+        function sistemiSifirla() {
+            onayla({
+                baslik: 'Tüm Verileri Sil',
+                mesaj: 'Bu işlem geri alınamaz!\n\nTüm daire, sakin, işlem ve aidat kayıtları kalıcı olarak silinecektir.\n\nDevam etmek istediğinizden emin misiniz?',
+                ikon: '🗑️',
+                onayMetin: 'Evet, Tümünü Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                yerelVerileriTemizle();
+                veriDegisikliginiIsaretle();
+                bulutaKaydetKuyrukla(true);
+                setTimeout(() => location.reload(), 350);
+            });
+        }
+        function verileriYedekle() { let d = veriPaketiOlustur(); let b = new Blob([JSON.stringify(d)], { type: 'application/json' }); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${aptBilgi.ad || 'Apartman'}_Yedek.json`; a.click(); }
+        function yedektenYukle(e) {
+            let f = e.target.files[0]; if(!f) return;
+            let r = new FileReader();
+            r.onload = (ev) => {
+                try {
+                    let d = JSON.parse(ev.target.result);
+                    if(!gecerliYedekVerisiMi(d)) throw new Error('Geçersiz yedek dosyası.');
+                    veriyiYereldeUygula(d, yedekVeriZamaniniOku(d) || Date.now());
+                    bulutaKaydetKuyrukla(true);
+                    setTimeout(() => location.reload(), 350);
+                } catch(err) {
+                    bildir({
+                        baslik: 'Yedek Yüklenemedi',
+                        mesaj: 'Dosya geçerli bir yedek formatında değil veya bozuk.\n\nHata: ' + err.message,
+                        ikon: '❌',
+                        kapatMetin: 'Tamam'
+                    });
+                    e.target.value = "";
+                }
+            };
+            r.readAsText(f);
+        }
+        function exceleAktar() { let csv = "\uFEFFTur;Tarih;Detay;Kalem;Aciklama;Tutar\n"; islemler.forEach(is => csv += `${is.tur};${is.tarih};${is.detay};${is.ay};${is.aciklama};${is.tutar}\n`); let b = new Blob([csv], { type: 'text/csv' }); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `Defter.csv`; a.click(); }
+
+        /*
+        // ── OTOMATİK KLASÖR YEDEKLEME ──────────────────────────────────
+        const VERI_GUNCELLEME_KEY = 'apartmanVeriSonGuncelleme';
+        let _yedekKlasorHandle = null;
+        let _yedekKlasorAdi = localStorage.getItem('apartmanOtomatikYedekKlasorAdi') || '';
+        let _yedekIzinBekliyor = false;
+
+        // Sayfa yüklenince kayıtlı klasör varsa ilk kullanıcı tıklamasında otomatik izin iste
+        document.addEventListener('click', async function _otomatikIzinIste() {
+            if (!_yedekIzinBekliyor || !_yedekKlasorHandle) return;
+            _yedekIzinBekliyor = false;
+            document.removeEventListener('click', _otomatikIzinIste);
+            try {
+                if (await yedekKlasorIzniVarMi(_yedekKlasorHandle, true)) {
+                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
+                    await otomatikYedegiEsitle();
+                } else {
+                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi);
+                }
+            } catch(e) {
+                console.warn('Otomatik izin isteği başarısız:', e.message);
+            }
+        });
+        const YEDEK_DB_ADI = 'apartman-otomatik-yedek-db';
+        const YEDEK_DB_MAGAZA = 'ayarlar';
+        const YEDEK_DB_ANAHTAR = 'yedek-klasor-handle';
+
+        function yerelVeriZamaniniOku() {
+            return Number(localStorage.getItem(VERI_GUNCELLEME_KEY) || 0) || 0;
+        }
+
+        function veriDegisikliginiIsaretle(zaman = Date.now()) {
+            localStorage.setItem(VERI_GUNCELLEME_KEY, String(zaman));
+            return zaman;
+        }
+
+        function gecerliYedekVerisiMi(veri) {
+            return !!(veri && Array.isArray(veri.daireListesi) && Array.isArray(veri.islemler));
+        }
+
+        function yedekVeriZamaniniOku(veri) {
+            return Number(veri?.meta?.updatedAt || veri?.updatedAt || 0) || 0;
+        }
+
+        function veriPaketiOlustur(guncellemeZamani = null) {
+            let updatedAt = guncellemeZamani || yerelVeriZamaniniOku() || Date.now();
+            return {
+                aptBilgi,
+                daireListesi,
+                islemler,
+                aidatAyarlari,
+                ekButceAyarlari,
+                manuelYillar,
+                sakinBilgileri,
+                smsAyarlari: {
+                    apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
+                    apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
+                    sender: localStorage.getItem(SMS_SENDER_KEY) || '',
+                    sablon: localStorage.getItem('vatanSmsSablon') || ''
+                },
+                meta: { updatedAt }
+            };
+        }
+
+        function veriyiYereldeUygula(veri, guncellemeZamani = null) {
+            localStorage.setItem('aptBilgi', JSON.stringify(veri.aptBilgi || {}));
+            localStorage.setItem('apartmanDaireListesi', JSON.stringify(veri.daireListesi || []));
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(veri.islemler || []));
+            localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(veri.aidatAyarlari || {}));
+            localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(veri.ekButceAyarlari || {}));
+            localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
+            localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
+
+            let smsAyarlari = veri.smsAyarlari || {};
+            if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId);
+            else localStorage.removeItem(SMS_API_ID_KEY);
+            if (smsAyarlari.apiKey) localStorage.setItem(SMS_API_KEY_KEY, smsAyarlari.apiKey);
+            else localStorage.removeItem(SMS_API_KEY_KEY);
+            if (smsAyarlari.sender) localStorage.setItem(SMS_SENDER_KEY, smsAyarlari.sender);
+            else localStorage.removeItem(SMS_SENDER_KEY);
+            if (smsAyarlari.sablon) localStorage.setItem('vatanSmsSablon', smsAyarlari.sablon);
+            else localStorage.removeItem('vatanSmsSablon');
+
+            veriDegisikliginiIsaretle(guncellemeZamani || yedekVeriZamaniniOku(veri) || Date.now());
+        }
+
+        async function otomatikYedekDosyaHandleBul(olustur = false) {
+            if (!_yedekKlasorHandle) return null;
+            let dosyaAdi = (aptBilgi.ad || 'Apartman') + '_OtomatikYedek.json';
+            try {
+                return await _yedekKlasorHandle.getFileHandle(dosyaAdi, { create: olustur });
+            } catch (e) {
+                if (olustur || e.name !== 'NotFoundError') throw e;
+            }
+            for await (const entry of _yedekKlasorHandle.values()) {
+                if (entry.kind === 'file' && entry.name.endsWith('_OtomatikYedek.json')) return entry;
+            }
+            return null;
+        }
+
+        async function otomatikYedegiOku() {
+            let dosyaHandle = await otomatikYedekDosyaHandleBul(false);
+            if (!dosyaHandle) return null;
+            let dosya = await dosyaHandle.getFile();
+            let icerik = await dosya.text();
+            if (!icerik.trim()) return null;
+            let veri = JSON.parse(icerik);
+            if (!gecerliYedekVerisiMi(veri)) throw new Error('otomatik-yedek-gecersiz');
+            return veri;
+        }
+
+        async function otomatikYedegiEsitle() {
+            if (!_yedekKlasorHandle) return;
+            if (!await yedekKlasorIzniVarMi(_yedekKlasorHandle, false)) {
+                otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
+                return;
+            }
+            try {
+                let yerelZaman = yerelVeriZamaniniOku();
+                let yedekVeri = await otomatikYedegiOku();
+                let yedekZaman = yedekVeriZamaniniOku(yedekVeri);
+
+                if (yedekVeri && yedekZaman > yerelZaman) {
+                    veriyiYereldeUygula(yedekVeri, yedekZaman);
+                    otomatikYedekDurumunuGuncelle('Daha yeni yedek yüklendi ✔', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
+                    location.reload();
+                    return;
+                }
+
+                if (yerelZaman > 0 || yedekVeri === null) {
+                    await otomatikYedekAl(yerelZaman || veriDegisikliginiIsaretle());
+                }
+            } catch (e) {
+                console.warn('Otomatik yedek senkron hatası:', e.message);
+            }
+        }
+
+        function yedekDbAc() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) {
+                    reject(new Error('indexeddb-desteklenmiyor'));
+                    return;
+                }
+                let istek = indexedDB.open(YEDEK_DB_ADI, 1);
+                istek.onupgradeneeded = () => {
+                    let db = istek.result;
+                    if (!db.objectStoreNames.contains(YEDEK_DB_MAGAZA)) db.createObjectStore(YEDEK_DB_MAGAZA);
+                };
+                istek.onsuccess = () => resolve(istek.result);
+                istek.onerror = () => reject(istek.error || new Error('indexeddb-acilamadi'));
+            });
+        }
+
+        async function yedekHandleKaydet(handle) {
+            let db = await yedekDbAc();
+            await new Promise((resolve, reject) => {
+                let tx = db.transaction(YEDEK_DB_MAGAZA, 'readwrite');
+                tx.objectStore(YEDEK_DB_MAGAZA).put(handle, YEDEK_DB_ANAHTAR);
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error || new Error('yedek-handle-kaydedilemedi'));
+                tx.onabort = () => reject(tx.error || new Error('yedek-handle-kaydedilemedi'));
+            });
+            db.close();
+            _yedekKlasorAdi = handle?.name || '';
+            localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
+        }
+
+        async function yedekHandleYukle() {
+            let db = await yedekDbAc();
+            let handle = await new Promise((resolve, reject) => {
+                let tx = db.transaction(YEDEK_DB_MAGAZA, 'readonly');
+                let istek = tx.objectStore(YEDEK_DB_MAGAZA).get(YEDEK_DB_ANAHTAR);
+                istek.onsuccess = () => resolve(istek.result || null);
+                istek.onerror = () => reject(istek.error || new Error('yedek-handle-okunamadi'));
+            });
+            db.close();
+            return handle;
+        }
+
+        async function yedekHandleTemizle() {
+            if (window.indexedDB) {
+                try {
+                    let db = await yedekDbAc();
+                    await new Promise((resolve, reject) => {
+                        let tx = db.transaction(YEDEK_DB_MAGAZA, 'readwrite');
+                        tx.objectStore(YEDEK_DB_MAGAZA).delete(YEDEK_DB_ANAHTAR);
+                        tx.oncomplete = resolve;
+                        tx.onerror = () => reject(tx.error || new Error('yedek-handle-silinemedi'));
+                        tx.onabort = () => reject(tx.error || new Error('yedek-handle-silinemedi'));
+                    });
+                    db.close();
+                } catch (e) {
+                    console.warn('Yedek klasör kaydı temizlenemedi:', e.message);
+                }
+            }
+            _yedekKlasorHandle = null;
+            _yedekKlasorAdi = '';
+            localStorage.removeItem('apartmanOtomatikYedekKlasorAdi');
+        }
+
+        async function yedekKlasorIzniVarMi(handle, izinIste = false) {
+            if (!handle) return false;
+            try {
+                let opts = { mode: 'readwrite' };
+                if (await handle.queryPermission(opts) === 'granted') return true;
+                if (izinIste && await handle.requestPermission(opts) === 'granted') return true;
+            } catch (e) {
+                console.warn('Yedek klasör izin kontrolü başarısız:', e.message);
+            }
+            return false;
+        }
+
+        async function otomatikYedekKlasorunuYukle() {
+            if (_yedekKlasorAdi) otomatikYedekDurumunuGuncelle('Klasör kayıtlı', _yedekKlasorAdi);
+            try {
+                let handle = await yedekHandleYukle();
+                if (!handle) return;
+                _yedekKlasorHandle = handle;
+                _yedekKlasorAdi = handle.name || _yedekKlasorAdi || '';
+                localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
+
+                if (await yedekKlasorIzniVarMi(handle, false)) {
+                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
+                    await otomatikYedegiEsitle();
+                } else {
+                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki bekleniyor...', _yedekKlasorAdi);
+                    _yedekIzinBekliyor = true;
+                }
+            } catch (e) {
+                console.warn('Kayıtlı yedek klasörü yüklenemedi:', e.message);
+                if (_yedekKlasorAdi) otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yeniden bağlayın', _yedekKlasorAdi);
+            }
+        }
+
+        async function otomatikKlasorSec() {
+            if (!window.showDirectoryPicker) {
+                bildir({
+                    baslik: 'Desteklenmeyen Tarayıcı',
+                    mesaj: 'Otomatik yedekleme özelliği yalnızca Chrome veya Edge tarayıcısında çalışmaktadır.\n\nLütfen Chrome veya Edge kullanın.',
+                    ikon: '🌐',
+                    kapatMetin: 'Anladım'
+                });
+                return;
+            }
+            try {
+                if (_yedekKlasorHandle && await yedekKlasorIzniVarMi(_yedekKlasorHandle, true)) {
+                    _yedekKlasorAdi = _yedekKlasorHandle.name || _yedekKlasorAdi || '';
+                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
+                    await otomatikYedegiEsitle();
+                    return;
+                }
+                _yedekKlasorHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                await yedekHandleKaydet(_yedekKlasorHandle);
+                otomatikYedekDurumunuGuncelle('Klasör seçildi ✔', _yedekKlasorHandle.name);
+                await otomatikYedegiEsitle();
+            } catch(e) {
+                if (e.name !== 'AbortError') {
+                    bildir({
+                        baslik: 'Klasör Seçilemedi',
+                        mesaj: 'Klasör seçme işlemi başarısız oldu.\n\nHata: ' + e.message,
+                        ikon: '❌',
+                        kapatMetin: 'Tamam'
+                    });
+                }
+            }
+        }
+
+        async function otomatikYedekAl(guncellemeZamani = null) {
+            if (!_yedekKlasorHandle) return;
+            try {
+                if (!await yedekKlasorIzniVarMi(_yedekKlasorHandle, false)) {
+                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
+                    return;
+                }
+                let veri = veriPaketiOlustur(guncellemeZamani);
+                let dosyaHandle = await otomatikYedekDosyaHandleBul(true);
+                let yazici = await dosyaHandle.createWritable();
+                await yazici.write(JSON.stringify(veri, null, 2));
+                await yazici.close();
+                let simdi = new Date().toLocaleString('tr-TR');
+                _yedekKlasorAdi = _yedekKlasorHandle.name || _yedekKlasorAdi || '';
+                localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
+                otomatikYedekDurumunuGuncelle('✅ Son yedek: ' + simdi, _yedekKlasorHandle.name);
+            } catch(e) {
+                console.warn('Otomatik yedek hatası:', e.message);
+            }
+        }
+
+        function otomatikYedekDurumunuGuncelle(zaman, klasorAdi) {
+            let durum = document.getElementById('otomatikYedekDurumu');
+            let klasorEl = document.getElementById('otomatikYedekKlasor');
+            let zamanEl = document.getElementById('otomatikYedekZaman');
+            if (durum && klasorEl && zamanEl) {
+                durum.style.display = 'block';
+                klasorEl.textContent = '📂 ' + (klasorAdi || '');
+                zamanEl.textContent = zaman;
+            }
+        }
+
+        // ───────────────────────────────────────────────────────────────
+
+
+        // ── TOPLU ÖDEME ─────────────────────────────────────────────────
+        */
+        function topluOdemeModalAc() {
+            // Daireler
+            let dDaire = document.getElementById('topluDaire');
+            dDaire.innerHTML = daireListesi.map(d => `<option value="${d}">${d}</option>`).join('');
+
+            // Yıllar
+            let dYil = document.getElementById('topluYil');
+            dYil.innerHTML = document.getElementById('yilSecimiDefter').innerHTML;
+            dYil.value = document.getElementById('yilSecimiDefter').value;
+
+            // Aylar
+            let ayHtml = aylar.map((a, i) => `<option value="${i}">${a}</option>`).join('');
+            document.getElementById('topluAyBasla').innerHTML = ayHtml;
+            document.getElementById('topluAyBitis').innerHTML = ayHtml;
+
+            // Varsayılan: ocak → aralık
+            document.getElementById('topluAyBasla').value = 0;
+            document.getElementById('topluAyBitis').value = 11;
+
+            // Bugünün tarihi
+            document.getElementById('topluTarih').valueAsDate = new Date();
+            document.getElementById('topluTutar').value = '';
+
+            document.getElementById('topluOnizleme').style.display = 'none';
+            document.getElementById('topluUyari').style.display = 'none';
+
+            modalAc('modalTopluOdeme');
+            topluOnizlemeGuncelle();
+        }
+
+        function topluOnizlemeGuncelle() {
+            let daire  = document.getElementById('topluDaire').value;
+            let yil    = parseInt(document.getElementById('topluYil').value);
+            let baslai = parseInt(document.getElementById('topluAyBasla').value);
+            let bitisi = parseInt(document.getElementById('topluAyBitis').value);
+            let ozelTutar = parseFloat(document.getElementById('topluTutar').value);
+
+            let ayar   = aidatAyarlari[yil] || {};
+            let aylik  = !isNaN(ozelTutar) && ozelTutar > 0 ? ozelTutar : (ayar[daire] || 0);
+
+            let uyariEl = document.getElementById('topluUyari');
+            let onizEl  = document.getElementById('topluOnizleme');
+
+            if(baslai > bitisi) {
+                uyariEl.textContent = '⚠️ Bitiş ayı başlangıç ayından önce olamaz.';
+                uyariEl.style.display = 'block';
+                onizEl.style.display = 'none';
+                document.getElementById('topluKaydetBtn').disabled = true;
+                return;
+            }
+            uyariEl.style.display = 'none';
+            document.getElementById('topluKaydetBtn').disabled = false;
+
+            // Zaten ödenmiş ayları işaretle
+            let satirHtml = '';
+            let toplamTutar = 0;
+            let odenmisAdet = 0;
+
+            for(let i = baslai; i <= bitisi; i++) {
+                let ayAdi = aylar[i];
+                let kalem = ayAdi + ' Aidatı';
+                let odenmis = islemler.filter(is =>
+                    is.yil === yil && is.detay === daire && is.ay === kalem
+                ).reduce((s, is) => s + is.tutar, 0);
+
+                let eklenecek = aylik - odenmis;
+                if(eklenecek <= 0) {
+                    odenmisAdet++;
+                    satirHtml += `<div class="toplu-satir" style="opacity:0.5;">
+                        <span class="ay-adi">✅ ${ayAdi}</span>
+                        <span style="color:#28a745;font-size:12px;">Zaten ödendi</span>
+                    </div>`;
+                } else {
+                    toplamTutar += eklenecek;
+                    let eksikNot = odenmis > 0 ? ` <small style="color:#888;">(${paraBiçim(odenmis)} var, kalan)</small>` : '';
+                    satirHtml += `<div class="toplu-satir">
+                        <span class="ay-adi">${ayAdi}${eksikNot}</span>
+                        <span class="ay-tutar">${paraBiçim(eklenecek)}</span>
+                    </div>`;
+                }
+            }
+
+            let toplamAy = bitisi - baslai + 1;
+            let eklenecekAy = toplamAy - odenmisAdet;
+
+            document.getElementById('topluOnizlemeBaslik').textContent =
+                `${daire} — ${yil} yılı ödeme listesi`;
+            document.getElementById('topluOnizlemeSayisi').textContent =
+                `${eklenecekAy} ay eklenecek`;
+            document.getElementById('topluOnizlemeSatirlar').innerHTML = satirHtml;
+            document.getElementById('topluOnizlemeToplam').textContent = paraBiçim(toplamTutar);
+            onizEl.style.display = 'block';
+
+            if(aylik === 0) {
+                uyariEl.textContent = '⚠️ Bu daire için ' + yil + ' yılı aidat tutarı tanımlanmamış. "Her Ay Tutarı" alanına manuel girin.';
+                uyariEl.style.display = 'block';
+            }
+        }
+
+        function topluOdemeKaydet() {
+            let daire     = document.getElementById('topluDaire').value;
+            let yil       = parseInt(document.getElementById('topluYil').value);
+            let baslai    = parseInt(document.getElementById('topluAyBasla').value);
+            let bitisi    = parseInt(document.getElementById('topluAyBitis').value);
+            let ozelTutar = parseFloat(document.getElementById('topluTutar').value);
+            let tarihRaw  = document.getElementById('topluTarih').value;
+
+            let ayar  = aidatAyarlari[yil] || {};
+            let aylik = !isNaN(ozelTutar) && ozelTutar > 0 ? ozelTutar : (ayar[daire] || 0);
+
+            if(aylik === 0) { toastGoster('Tutar sıfır, lütfen "Her Ay Tutarı" girin.', 'hata'); return; }
+            if(baslai > bitisi) { toastGoster('Bitiş ayı, başlangıç ayından önce olamaz.', 'hata'); return; }
+
+            let tarihObj = tarihRaw ? new Date(tarihRaw) : new Date();
+            let eklenenSayisi = 0;
+
+            for(let i = baslai; i <= bitisi; i++) {
+                let ayAdi  = aylar[i];
+                let kalem  = ayAdi + ' Aidatı';
+                let odenmis = islemler.filter(is =>
+                    is.yil === yil && is.detay === daire && is.ay === kalem
+                ).reduce((s, is) => s + is.tutar, 0);
+                let eklenecek = aylik - odenmis;
+                if(eklenecek <= 0) continue;
+
+                // Tarih: her ay için ödeme günü aynı, ama ay numarasını kullan
+                let ayTarih = new Date(tarihObj.getFullYear(), tarihObj.getMonth(), tarihObj.getDate());
+                let formatliTarih = ayTarih.toLocaleDateString('tr-TR');
+
+                islemler.push({
+                    tur: 'Gelir',
+                    tutar: eklenecek,
+                    aciklama: `${ayAdi} aidatı (toplu ödeme)`,
+                    yil,
+                    detay: daire,
+                    ay: kalem,
+                    tarih: formatliTarih
+                });
+                eklenenSayisi++;
+            }
+
+            if(eklenenSayisi === 0) {
+                toastGoster('Tüm aylar zaten ödenmiş, eklenecek kayıt yok.', 'uyari');
+                return;
+            }
+
+            islemler.sort((a, b) => {
+                if(a.yil !== b.yil) return a.yil - b.yil;
+                return tarihSirala(a.tarih) - tarihSirala(b.tarih);
+            });
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            tablolariGuncelle();
+            modalKapat('modalTopluOdeme');
+            toastGoster(`${daire} — ${eklenenSayisi} aylık ödeme kaydedildi ✓`, 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+        // ───────────────────────────────────────────────────────────────
+        // ── SMS BİLDİRİM (VatanSMS) ───────────────────────────────────
+        const SMS_SABLON_VARSAYILAN = 'Sayin {AD}, {APARTMAN} icin {AYLAR} aylarına ait toplam {BORC} tutarında borcunuz bulunmaktadır. Bilgilerinize saygılarımızla.';
+        function smsApiToggle() {
+            let alani = document.getElementById('smsApiAlani');
+            let btn   = document.getElementById('smsApiToggleBtn');
+            let acik  = alani.style.display !== 'none';
+            alani.style.display = acik ? 'none' : 'block';
+            btn.classList.toggle('aktif', !acik);
+            btn.textContent = acik ? '⚙️ API Ayarları' : '✕ Kapat';
+        }
+
+        function smsModalAc() {
+            // API bilgilerini hatırlıyorsa doldur
+            let kaydedilmisId     = localStorage.getItem(SMS_API_ID_KEY) || '';
+            let kaydedilmisKey    = localStorage.getItem(SMS_API_KEY_KEY) || '';
+            let kaydedilmisSender = localStorage.getItem(SMS_SENDER_KEY) || '';
+            document.getElementById('smsApiId').value     = kaydedilmisId;
+            document.getElementById('smsApiKey').value    = kaydedilmisKey;
+            document.getElementById('smsSender').value    = kaydedilmisSender;
+
+            // API kayıtlı değilse otomatik aç, kayıtlıysa gizli başlat
+            let alani = document.getElementById('smsApiAlani');
+            let btn   = document.getElementById('smsApiToggleBtn');
+            let apiKayitli = kaydedilmisId !== '';
+            alani.style.display = apiKayitli ? 'none' : 'block';
+            btn.classList.toggle('aktif', !apiKayitli);
+            btn.textContent = apiKayitli ? '⚙️ API Ayarları' : '✕ Kapat';
+
+            // Durum etiketi
+            let durumEl = document.getElementById('smsApiKayitDurumu');
+            if (durumEl) durumEl.textContent = apiKayitli ? '✅ Kayıtlı' : '';
+
+            // Şablon
+            let kaydedilmisSablon = localStorage.getItem('vatanSmsSablon') || SMS_SABLON_VARSAYILAN;
+            document.getElementById('smsMessajSablonu').value = kaydedilmisSablon;
+            smsKarakterSay();
+
+            smsListesiniDoldur();
+            modalAc('modalSms');
+        }
+
+        function smsApiBilgileriniSil() {
+            localStorage.removeItem(SMS_API_ID_KEY);
+            localStorage.removeItem(SMS_API_KEY_KEY);
+            localStorage.removeItem(SMS_SENDER_KEY);
+            document.getElementById('smsApiId').value  = '';
+            document.getElementById('smsApiKey').value = '';
+            document.getElementById('smsSender').value = '';
+            let durumEl = document.getElementById('smsApiKayitDurumu');
+            if (durumEl) durumEl.textContent = '';
+            toastGoster('API bilgileri temizlendi.', 'bilgi');
+        }
+
+        function smsApiBilgileriniKaydet() {
+            let apiId  = document.getElementById('smsApiId').value.trim();
+            let apiKey = document.getElementById('smsApiKey').value.trim();
+            let sender = document.getElementById('smsSender').value.trim();
+            if (apiId)  localStorage.setItem(SMS_API_ID_KEY,  apiId);
+            if (apiKey) localStorage.setItem(SMS_API_KEY_KEY, apiKey);
+            if (sender) localStorage.setItem(SMS_SENDER_KEY,  sender);
+        }
+
+        function smsKarakterSay() {
+            let sablon = document.getElementById('smsMessajSablonu').value;
+            localStorage.setItem('vatanSmsSablon', sablon);
+            let uzunluk = sablon.length;
+            let smsSayisi = uzunluk <= 160 ? 1 : Math.ceil(uzunluk / 153);
+            document.getElementById('smsKaracterSayac').textContent = `${uzunluk} karakter (${smsSayisi} SMS)`;
+        }
+
+        function smsMesajHazirla(daire, ad, borc, aylarMetni) {
+            let aptAd  = aptBilgi.ad || 'Apartmanınız';
+            let sablon = document.getElementById('smsMessajSablonu').value;
+            return sablon
+                .replace(/{AD}/g, ad)
+                .replace(/{DAIRE}/g, daire)
+                .replace(/{BORC}/g, borc)
+                .replace(/{AYLAR}/g, aylarMetni || '-')
+                .replace(/{APARTMAN}/g, aptAd);
+        }
+
+        function smsTelTemizle(tel) {
+            let t = tel.replace(/\s|-|\(|\)/g, '');
+            if (t.startsWith('0')) t = t.slice(1);
+            if (t.startsWith('+90')) t = t.slice(3);
+            if (t.startsWith('90') && t.length === 12) t = t.slice(2);
+            return t; // 10 haneli: 5XXXXXXXXX
+        }
+
+        function smsListesiniDoldur() {
+            let yil = parseInt(document.getElementById('yilSecimiAidat').value);
+            let borcluSakinler = [];
+
+            daireListesi.forEach(daire => {
+                let sakin  = sakinBilgileri[daire] || {};
+                let ad     = sakin.ad || daire;
+                let tel    = sakin.tel ? smsTelTemizle(sakin.tel) : '';
+
+                let ayarlar = aidatAyarlari[yil] || {};
+                let aylik   = ayarlar[daire] || 0;
+                if (aylik === 0) return;
+
+                let borcluAylar = [];
+                let toplamBorc  = 0;
+                let simdi = new Date();
+                let simdiYil = simdi.getFullYear();
+                let simdiAy  = simdi.getMonth(); // 0-indexed
+
+                aylar.forEach((ayAdi, idx) => {
+                    if (yil === simdiYil && idx > simdiAy) return;
+                    let kalem   = ayAdi + ' Aidatı';
+                    let odenmis = islemler.filter(is =>
+                        is.yil === yil && is.detay === daire && is.ay === kalem
+                    ).reduce((s, is) => s + is.tutar, 0);
+                    let borc = aylik - odenmis;
+                    if (borc > 0) { borcluAylar.push(ayAdi); toplamBorc += borc; }
+                });
+
+                if (toplamBorc > 0) {
+                    borcluSakinler.push({ daire, ad, tel, borc: toplamBorc, borcluAylar });
+                }
+            });
+
+            // Özet
+            let telliSayisi = borcluSakinler.filter(s => s.tel).length;
+            document.getElementById('smsOzet').textContent =
+                `${borcluSakinler.length} borçlu sakin — ${telliSayisi} kişinin telefonu kayıtlı`;
+
+            if (borcluSakinler.length === 0) {
+                document.getElementById('smsListesi').innerHTML =
+                    '<div class="sms-bos-mesaj">🎉 ' + yil + ' yılında borçlu sakin yok!</div>';
+                return;
+            }
+
+            let html = `<div class="sms-secim-bar">
+                <label>
+                    <input type="checkbox" id="smsHepsiniSec" onchange="smsHepsiniToggle(this.checked)">
+                    Tümünü Seç
+                </label>
+                <span class="sms-secili-sayisi" id="smsSeciliSayisi">0 seçili</span>
+            </div><div class="sms-kart-grid">`;
+
+            borcluSakinler.forEach((s, i) => {
+                let telVar   = !!s.tel;
+                let borcStr  = paraBiçim(s.borc);
+                let aylarStr = s.borcluAylar.join(', ');
+                let cbId     = `smsChk_${i}`;
+                let telGoster = telVar ? s.tel : '⚠️ Yok';
+
+                html += `<div class="sms-kart${!telVar ? ' telefon-yok' : ''}" id="smsKart_${i}">
+                    <input type="checkbox" id="${cbId}" class="sms-chk"
+                        ${!telVar ? 'disabled style="opacity:0.35"' : ''}
+                        data-daire="${s.daire}"
+                        data-ad="${s.ad.replace(/"/g,"'")}"
+                        data-tel="${s.tel}"
+                        data-borc="${borcStr}"
+                        data-aylar="${aylarStr}"
+                        onchange="smsSecimGuncelle()">
+                    <div class="sms-kart-bilgi">
+                        <div class="sms-kart-ad" title="${s.daire} — ${s.ad}">${s.daire} — ${s.ad}</div>
+                        <div class="sms-kart-satir">
+                            <span class="sms-kart-tel">${telVar ? '📱 ' + telGoster : '⚠️ Telefon yok'}</span>
+                            <span class="sms-kart-borc">💸 ${borcStr}</span>
+                        </div>
+                        <div class="sms-kart-aylar" title="${aylarStr}">📅 ${aylarStr}</div>
+                        <div class="sms-durum-satiri" id="smsDurum_${i}"></div>
+                    </div>
+                    <button class="btn-sms-tek" onclick="smsTekGonder(${i},'${s.daire}','${s.ad.replace(/'/g,"\\'")}','${s.tel}','${borcStr}','${aylarStr}')"
+                        ${!telVar ? 'disabled title="Telefon kaydı yok"' : 'title="Tek SMS gönder"'}>
+                        📤
+                    </button>
+                </div>`;
+            });
+
+            html += '</div>'
+            document.getElementById('smsListesi').innerHTML = html;
+            smsSecimGuncelle();
+        }
+
+        function smsHepsiniToggle(secili) {
+            document.querySelectorAll('.sms-chk:not(:disabled)').forEach(cb => cb.checked = secili);
+            smsSecimGuncelle();
+        }
+
+        function smsSecimGuncelle() {
+            let seciliSayisi = document.querySelectorAll('.sms-chk:checked').length;
+            let el = document.getElementById('smsSeciliSayisi');
+            if (el) el.textContent = seciliSayisi + ' seçili';
+            let hepsi = document.getElementById('smsHepsiniSec');
+            if (hepsi) {
+                let toplam = document.querySelectorAll('.sms-chk:not(:disabled)').length;
+                hepsi.indeterminate = seciliSayisi > 0 && seciliSayisi < toplam;
+                hepsi.checked = seciliSayisi === toplam && toplam > 0;
+            }
+        }
+
+        async function smsGonderApiIsteği(telefonlar, mesajlar, tekMesaj) {
+            let apiId   = document.getElementById('smsApiId').value.trim();
+            let apiKey  = document.getElementById('smsApiKey').value.trim();
+            let sender  = document.getElementById('smsSender').value.trim() || 'BILGI';
+
+            if (!apiId || !apiKey) {
+                toastGoster('API ID ve API Key girilmesi zorunludur!', 'hata');
+                return null;
+            }
+            if (!sender) {
+                toastGoster('Gönderici adı boş olamaz!', 'hata');
+                return null;
+            }
+
+            // API bilgilerini hatırla
+            if (document.getElementById('smsApiHatirla').checked) {
+                localStorage.setItem(SMS_API_ID_KEY,   apiId);
+                localStorage.setItem(SMS_API_KEY_KEY,  apiKey);
+                localStorage.setItem(SMS_SENDER_KEY,   sender);
+            }
+
+            let payload;
+            if (tekMesaj) {
+                // 1toN: herkese aynı mesaj
+                payload = {
+                    api_id: apiId,
+                    api_key: apiKey,
+                    sender: sender,
+                    message_type: 'turkce',
+                    message: tekMesaj,
+                    message_content_type: 'bilgi',
+                    phones: telefonlar
+                };
+                try {
+                    let res = await fetch('https://api.vatansms.net/api/v1/1toN', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    return await res.json();
+                } catch (e) {
+                    return { error: e.message };
+                }
+            } else {
+                // NtoN: kişiye özel mesaj
+                payload = {
+                    api_id: apiId,
+                    api_key: apiKey,
+                    sender: sender,
+                    message_type: 'turkce',
+                    message_content_type: 'bilgi',
+                    phones: telefonlar.map((tel, i) => ({ phone: tel, message: mesajlar[i] }))
+                };
+                try {
+                    let res = await fetch('https://api.vatansms.net/api/v1/NtoN', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    return await res.json();
+                } catch (e) {
+                    return { error: e.message };
+                }
+            }
+        }
+
+        async function smsTekGonder(idx, daire, ad, tel, borc, aylarMetni) {
+            if (!tel) { toastGoster('Bu sakin için telefon numarası yok!', 'hata'); return; }
+            let mesaj = smsMesajHazirla(daire, ad, borc, aylarMetni);
+            let durumEl = document.getElementById(`smsDurum_${idx}`);
+            if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-bekliyor'; durumEl.textContent = '⏳ Gönderiliyor...'; }
+
+            let sonuc = await smsGonderApiIsteği([tel], [mesaj], null);
+
+            if (!sonuc) return;
+            if (sonuc.error) {
+                if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-hata'; durumEl.textContent = '❌ Hata: ' + sonuc.error; }
+                toastGoster('SMS gönderilemedi: ' + sonuc.error, 'hata');
+            } else if (sonuc.status === true || sonuc.status === 'success' || sonuc.code === 200 || (sonuc.data && sonuc.data.status)) {
+                if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-basarili'; durumEl.textContent = '✅ SMS gönderildi'; }
+                toastGoster(`${ad} — SMS gönderildi ✓`, 'basari');
+            } else {
+                let hataMsg = sonuc.message || sonuc.error_message || JSON.stringify(sonuc);
+                if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-hata'; durumEl.textContent = '❌ ' + hataMsg; }
+                toastGoster('API Hatası: ' + hataMsg, 'hata');
+            }
+        }
+
+        async function smsTumGonder() {
+            let seciliCheckboxlar = Array.from(document.querySelectorAll('.sms-chk:checked'));
+            if (seciliCheckboxlar.length === 0) {
+                bildir({ baslik: 'Seçim Yapılmadı', mesaj: 'Lütfen SMS göndermek istediğiniz kişileri seçin.', ikon: '👆', kapatMetin: 'Tamam' });
+                return;
+            }
+
+            let apiId  = document.getElementById('smsApiId').value.trim();
+            let apiKey = document.getElementById('smsApiKey').value.trim();
+            if (!apiId || !apiKey) {
+                bildir({ baslik: 'API Bilgisi Eksik', mesaj: 'Lütfen VatanSMS API ID ve API Key bilgilerini girin.', ikon: '🔑', kapatMetin: 'Tamam' });
+                return;
+            }
+
+            onayla({
+                baslik: 'SMS Gönder',
+                mesaj: `${seciliCheckboxlar.length} kişiye SMS gönderilecek.\nVatanSMS kredinizden düşülecektir.\n\nDevam etmek istiyor musunuz?`,
+                ikon: '📱',
+                onayMetin: `Gönder (${seciliCheckboxlar.length} kişi)`,
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#1e40af'
+            }, async () => {
+                let btn = document.getElementById('smsTumGonderBtn');
+                btn.disabled = true;
+                btn.textContent = '⏳ Gönderiliyor...';
+
+                let telefonlar = [];
+                let mesajlar   = [];
+
+                seciliCheckboxlar.forEach((cb, i) => {
+                    let tel = smsTelTemizle(cb.dataset.tel);
+                    let mesaj = smsMesajHazirla(cb.dataset.daire, cb.dataset.ad, cb.dataset.borc, cb.dataset.aylar);
+                    telefonlar.push(tel);
+                    mesajlar.push(mesaj);
+                    let idx = cb.id.replace('smsChk_', '');
+                    let durumEl = document.getElementById(`smsDurum_${idx}`);
+                    if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-bekliyor'; durumEl.textContent = '⏳ Bekliyor...'; }
+                });
+
+                let sonuc = await smsGonderApiIsteği(telefonlar, mesajlar, null);
+
+                btn.disabled = false;
+                btn.textContent = '📱 Seçilenlere SMS Gönder';
+
+                if (!sonuc) return;
+
+                if (sonuc.error) {
+                    toastGoster('SMS gönderilemedi: ' + sonuc.error, 'hata');
+                    seciliCheckboxlar.forEach(cb => {
+                        let idx = cb.id.replace('smsChk_', '');
+                        let durumEl = document.getElementById(`smsDurum_${idx}`);
+                        if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-hata'; durumEl.textContent = '❌ Ağ hatası'; }
+                    });
+                } else if (sonuc.status === true || sonuc.status === 'success' || sonuc.code === 200) {
+                    toastGoster(`${seciliCheckboxlar.length} kişiye SMS gönderildi ✓`, 'basari');
+                    seciliCheckboxlar.forEach(cb => {
+                        let idx = cb.id.replace('smsChk_', '');
+                        let durumEl = document.getElementById(`smsDurum_${idx}`);
+                        if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-basarili'; durumEl.textContent = '✅ SMS gönderildi'; }
+                    });
+                } else {
+                    let hataMsg = sonuc.message || sonuc.error_message || JSON.stringify(sonuc);
+                    toastGoster('API Hatası: ' + hataMsg, 'hata');
+                    seciliCheckboxlar.forEach(cb => {
+                        let idx = cb.id.replace('smsChk_', '');
+                        let durumEl = document.getElementById(`smsDurum_${idx}`);
+                        if (durumEl) { durumEl.className = 'sms-durum-satiri sms-durum-hata'; durumEl.textContent = '❌ ' + hataMsg; }
+                    });
+                }
+            });
+        }
+        // ───────────────────────────────────────────────────────────────
+        function toastGoster(mesaj, tip = 'bilgi') {
+            let kap = document.getElementById('toastKap');
+            let toast = document.createElement('div');
+            toast.className = `toast toast-${tip}`;
+            toast.textContent = mesaj;
+            kap.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('toast-gorunum'));
+            setTimeout(() => {
+                toast.classList.remove('toast-gorunum');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ── KLAVYE KISAYOLLARI ──────────────────────────────────────────
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'Escape') {
+                document.querySelectorAll('.modal-arkaplan:not(.hidden)').forEach(m => m.classList.add('hidden'));
+            }
+            if(e.key === 'Enter' && e.target.tagName === 'INPUT' && !e.target.closest('.wa-modal-kutu')) {
+                let modal = e.target.closest('.modal-kutu');
+                if(modal) {
+                    let kaydetBtn = modal.querySelector('.btn-success');
+                    if(kaydetBtn) { e.preventDefault(); kaydetBtn.click(); }
+                }
+            }
+        });
+
+        // ── ARA DÖNEM ÖDEME ─────────────────────────────────────────────
+        function araDonemiModalAc() {
+            let dDaire = document.getElementById('araDaire');
+            dDaire.innerHTML = daireListesi.map(d=>`<option value="${d}">${d}</option>`).join('');
+            let dYil = document.getElementById('araYil');
+            dYil.innerHTML = document.getElementById('yilSecimiDefter').innerHTML;
+            dYil.value = document.getElementById('yilSecimiDefter').value;
+            let dAy = document.getElementById('araAy');
+            dAy.innerHTML = aylar.map((a,i)=>`<option value="${i}">${a}</option>`).join('');
+            dAy.value = new Date().getMonth();
+            document.getElementById('araGun').value = 1;
+            document.getElementById('araHesapTutar').value = '';
+            document.getElementById('araAciklama').value = '';
+            document.getElementById('araSonucYazi').textContent = '— Hesapla butonuna basın —';
+            modalAc('modalAraDonemi');
+        }
+
+        function araDonemiHesapla() {
+            let daire = document.getElementById('araDaire').value;
+            let yil = parseInt(document.getElementById('araYil').value);
+            let ayIdx = parseInt(document.getElementById('araAy').value);
+            let gun = parseInt(document.getElementById('araGun').value) || 1;
+            let mod = document.getElementById('araMod').value;
+            let ayar = aidatAyarlari[yil] || {};
+            let aylik = ayar[daire] || 0;
+            if(aylik === 0) { toastGoster(daire + ' için ' + yil + ' yılı aidat tutarı tanımlanmamış.', 'hata'); return; }
+            let aydakiGun = new Date(yil, ayIdx + 1, 0).getDate();
+            let odenecekGun = mod === 'giris' ? (aydakiGun - gun + 1) : gun;
+            odenecekGun = Math.max(0, Math.min(odenecekGun, aydakiGun));
+            let hesap = Math.round((aylik / aydakiGun) * odenecekGun);
+            document.getElementById('araHesapTutar').value = hesap;
+            document.getElementById('araSonucYazi').textContent = `${odenecekGun} gün × (${paraBiçim(aylik)} ÷ ${aydakiGun}) = ${paraBiçim(hesap)}`;
+            document.getElementById('araAciklama').value = `${aylar[ayIdx]} ara dönem (${odenecekGun}/${aydakiGun} gün)`;
+        }
+
+        function araDonemiKaydet() {
+            let daire = document.getElementById('araDaire').value;
+            let yil = parseInt(document.getElementById('araYil').value);
+            let ayIdx = parseInt(document.getElementById('araAy').value);
+            let tutar = parseFloat(document.getElementById('araHesapTutar').value);
+            let acik = document.getElementById('araAciklama').value.trim();
+            if(!tutar || tutar <= 0) { toastGoster('Önce "Hesapla" butonuna basın.', 'hata'); return; }
+            if(!acik) { toastGoster('Açıklama boş olamaz.', 'hata'); return; }
+            let gun = String(document.getElementById('araGun').value || 1).padStart(2,'0');
+            let ay = String(ayIdx + 1).padStart(2,'0');
+            let tarih = `${gun}.${ay}.${yil}`;
+            islemler.push({ tur:'Gelir', tutar, aciklama:acik, yil, detay:daire, ay:`${aylar[ayIdx]} Aidatı`, tarih });
+            islemler.sort((a,b) => { if(a.yil!==b.yil) return a.yil-b.yil; return tarihSirala(a.tarih)-tarihSirala(b.tarih); });
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            tablolariGuncelle();
+            modalKapat('modalAraDonemi');
+            toastGoster(`${daire} — ${aylar[ayIdx]} ara dönem ödemesi eklendi ✓`, 'basari');
+            bulutaKaydetKuyrukla(true);
+        }
+        // ───────────────────────────────────────────────────────────────
+
+    </script>
+</body>
+</html>
