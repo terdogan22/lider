@@ -1310,6 +1310,7 @@
         async function uzaktakiVeriyiYukle() {
             if (!_supabase || !_oturum) return;
             let yerelZaman = yerelVeriZamaniniOku();
+            senkronDurumunuGuncelle('Bulut verisi kontrol ediliyor...', 'bekliyor');
             let { data, error } = await zamanAsimliCalistir(
                 _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle(),
                 12000,
@@ -1323,6 +1324,7 @@
                 return;
             }
             if (!data?.payload && !uygulamaVerisiVarMi()) {
+                senkronDurumunuGuncelle('İlk bulut kaydı hazırlanıyor...', 'bekliyor');
                 veriyiYereldeUygula(varsayilanVeriyiOlustur(), Date.now());
             } else {
                 verileriYukle();
@@ -1370,7 +1372,7 @@
             }
             _supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
             if (!_authDinleyiciKuruldu) {
-                _supabase.auth.onAuthStateChange(async (event, session) => {
+                _supabase.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_OUT') {
                         _oturum = null;
                         _uygulamaHazir = false;
@@ -1379,8 +1381,11 @@
                         return;
                     }
                     if (session) {
-                        try { await oturumuHazirla(session); }
-                        catch (e) { authDurumunuGuncelle('Veriler yüklenemedi: ' + e.message, 'hata'); }
+                        setTimeout(() => {
+                            oturumuHazirla(session).catch(e => {
+                                authDurumunuGuncelle('Veriler yüklenemedi: ' + e.message, 'hata');
+                            });
+                        }, 0);
                     }
                 });
                 _authDinleyiciKuruldu = true;
@@ -1400,9 +1405,12 @@
             let password = document.getElementById('girisSifre').value;
             if (!email || !password) return authDurumunuGuncelle('E-posta ve şifre girin.', 'hata');
             authDurumunuGuncelle('Giriş yapılıyor...', 'bekliyor');
-            let { error } = await _supabase.auth.signInWithPassword({ email, password });
+            let { data, error } = await _supabase.auth.signInWithPassword({ email, password });
             if (error) return authDurumunuGuncelle('Giriş başarısız: ' + error.message, 'hata');
-            authDurumunuGuncelle('Giriş başarılı.', 'basari');
+            authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
+            if (data?.session) {
+                await oturumuHazirla(data.session);
+            }
         }
 
         async function hesapOlustur() {
@@ -1411,8 +1419,13 @@
             let password = document.getElementById('girisSifre').value;
             if (!email || !password) return authDurumunuGuncelle('Yeni hesap için e-posta ve şifre girin.', 'hata');
             authDurumunuGuncelle('Hesap oluşturuluyor...', 'bekliyor');
-            let { error } = await _supabase.auth.signUp({ email, password });
+            let { data, error } = await _supabase.auth.signUp({ email, password });
             if (error) return authDurumunuGuncelle('Hesap oluşturulamadı: ' + error.message, 'hata');
+            if (data?.session) {
+                authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
+                await oturumuHazirla(data.session);
+                return;
+            }
             authDurumunuGuncelle('Hesap oluşturuldu. Gerekirse e-postayı onaylayıp giriş yap.', 'basari');
         }
 
