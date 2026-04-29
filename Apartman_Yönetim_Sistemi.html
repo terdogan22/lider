@@ -602,32 +602,9 @@
             align-items: center;
             justify-content: center;
         }
-        .acilis-ekrani {
-            min-height: calc(100vh - 48px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .acilis-kart {
-            width: 100%;
-            max-width: 420px;
-            background: linear-gradient(160deg, #ffffff, #f4f8fd);
-            border: 1px solid #dbe7f5;
-            border-radius: 22px;
-            box-shadow: 0 24px 60px rgba(30,64,175,.10);
-            padding: 30px 28px;
-            text-align: center;
-        }
-        .acilis-kart h2 {
-            margin: 0 0 10px;
-            color: var(--mavi);
-            font-size: 24px;
-            letter-spacing: .05em;
-        }
-        .acilis-kart p {
-            margin: 0;
-            color: var(--metin-ac);
-            font-size: 14px;
+        body.yukleniyor #authPaneli,
+        body.yukleniyor #uygulamaKabugu {
+            visibility: hidden;
         }
         .auth-kart {
             width: 100%;
@@ -699,14 +676,7 @@
         }
     </style>
 </head>
-<body>
-
-    <div id="acilisPaneli" class="acilis-ekrani no-print">
-        <div class="acilis-kart">
-            <h2>LİDER APARTMANI</h2>
-            <p>Veriler hazırlanıyor...</p>
-        </div>
-    </div>
+<body class="yukleniyor">
 
     <div id="authPaneli" class="auth-ekrani no-print hidden">
         <div class="auth-kart">
@@ -1268,13 +1238,13 @@
         }
 
         function uygulamayiGoster() {
-            document.getElementById('acilisPaneli').classList.add('hidden');
+            document.body.classList.remove('yukleniyor');
             document.getElementById('authPaneli').classList.add('hidden');
             document.getElementById('uygulamaKabugu').classList.remove('hidden');
         }
 
         function authPaneliniGoster() {
-            document.getElementById('acilisPaneli').classList.add('hidden');
+            document.body.classList.remove('yukleniyor');
             document.getElementById('uygulamaKabugu').classList.add('hidden');
             document.getElementById('authPaneli').classList.remove('hidden');
         }
