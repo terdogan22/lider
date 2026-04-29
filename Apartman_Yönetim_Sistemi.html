@@ -857,6 +857,33 @@
         </div>
     </div>
 
+    <div id="modalBankaIceAktar" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu" style="width:min(980px, 96vw);">
+            <h3>TEB Ekstre Ön İzleme</h3>
+            <p style="margin:0 0 14px; color:#64748b; font-size:13px;">Pozitif hareketler gelir kaydı olarak hazırlanır. Eşleşmeyen satırlar "Diğer" bölümüyle içe alınır.</p>
+            <div id="bankaIceAktarOzet" style="margin-bottom:12px; color:#1e293b; font-weight:600;"></div>
+            <div style="max-height:420px; overflow:auto; border:1px solid #dbeafe; border-radius:12px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Bölüm</th>
+                            <th>Kalem</th>
+                            <th>Açıklama</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bankaIceAktarGovde"></tbody>
+                </table>
+            </div>
+            <div class="modal-butonlar">
+                <button class="btn-danger" onclick="modalKapat('modalBankaIceAktar')">Kapat</button>
+                <button class="btn-success" onclick="bankaHareketleriniIceAktar()">İçe Aktar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- WHATSAPP BİLDİRİM MODALİ -->
     <div id="modalWhatsapp" class="modal-arkaplan hidden no-print">
         <div class="wa-modal-kutu">
@@ -1078,12 +1105,14 @@
         <div class="yil-paneli no-print">
             <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:130px;"></select>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button onclick="document.getElementById('bankaEkstresiDosyasi').click()" class="btn-koyu-mavi" style="width:auto;">TEB Ekstre Yükle</button>
                 <button onclick="topluOdemeModalAc()" class="btn-success" style="width:auto;">💰 Toplu Ödeme</button>
                 <button onclick="araDonemiModalAc()" class="btn-success" style="width:auto;">📅 Ara Dönem</button>
                 <button onclick="window.print()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
                 <button onclick="exceleAktar()" class="btn-koyu-mavi" style="width:auto;">📊 Excel</button>
             </div>
         </div>
+        <input type="file" id="bankaEkstresiDosyasi" accept=".xls,.xlsx,.xlsm" style="display:none;" onchange="bankaEkstresiSecildi(event)">
         <div class="no-print giris-formu">
             <div class="row">
                 <div class="col" style="min-width: 120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
@@ -1169,6 +1198,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="supabase-config.js"></script>
     <script>
         // ── ÖZEL ONAY & BİLDİRİM SİSTEMİ ──────────────────────────────
@@ -1208,8 +1238,10 @@
         const SMS_API_KEY_KEY = 'vatanSmsApiKey';
         const SMS_SENDER_KEY = 'vatanSmsSender';
         const VERI_GUNCELLEME_KEY = 'apartmanVeriSonGuncelleme';
-        const UYGULAMA_LOCAL_KEYS = ['aptBilgi','apartmanDaireListesi','apartmanIslemleri','apartmanAidatAyarlari','apartmanEkButceAyarlari','apartmanManuelYillar','apartmanSakinleri','apartmanKullanicilari',SMS_API_ID_KEY,SMS_API_KEY_KEY,SMS_SENDER_KEY,'vatanSmsSablon',VERI_GUNCELLEME_KEY];
-        let aptBilgi, daireListesi, islemler, aidatAyarlari, ekButceAyarlari, manuelYillar, sakinBilgileri, kullaniciKayitlari, aktifEkButceAdi;
+        const BANKA_AKTARIM_KEY = 'apartmanBankaAktarimAnahtarlari';
+        const UYGULAMA_LOCAL_KEYS = ['aptBilgi','apartmanDaireListesi','apartmanIslemleri','apartmanAidatAyarlari','apartmanEkButceAyarlari','apartmanManuelYillar','apartmanSakinleri','apartmanKullanicilari',BANKA_AKTARIM_KEY,SMS_API_ID_KEY,SMS_API_KEY_KEY,SMS_SENDER_KEY,'vatanSmsSablon',VERI_GUNCELLEME_KEY];
+        let aptBilgi, daireListesi, islemler, aidatAyarlari, ekButceAyarlari, manuelYillar, sakinBilgileri, kullaniciKayitlari, bankaAktarimAnahtarlari, aktifEkButceAdi;
+        let _hazirBankaHareketleri = [];
         let _supabase = null, _oturum = null, _uygulamaHazir = false, _depoyaYazimAskida = false, _senkronZamanlayici = null, _authDinleyiciKuruldu = false;
 
         function verileriYukle() {
@@ -1221,6 +1253,7 @@
             manuelYillar = JSON.parse(localStorage.getItem('apartmanManuelYillar')) || [];
             sakinBilgileri = JSON.parse(localStorage.getItem('apartmanSakinleri')) || {};
             kullaniciKayitlari = JSON.parse(localStorage.getItem('apartmanKullanicilari')) || [];
+            bankaAktarimAnahtarlari = JSON.parse(localStorage.getItem(BANKA_AKTARIM_KEY)) || [];
         }
 
         function authDurumunuGuncelle(mesaj, tip = 'bilgi') {
@@ -1278,6 +1311,7 @@
             localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
             localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
             localStorage.setItem('apartmanKullanicilari', JSON.stringify(veri.kullaniciKayitlari || []));
+            localStorage.setItem(BANKA_AKTARIM_KEY, JSON.stringify(veri.bankaAktarimAnahtarlari || []));
             let smsAyarlari = veri.smsAyarlari || {};
             if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId); else localStorage.removeItem(SMS_API_ID_KEY);
             if (smsAyarlari.apiKey) localStorage.setItem(SMS_API_KEY_KEY, smsAyarlari.apiKey); else localStorage.removeItem(SMS_API_KEY_KEY);
@@ -1299,6 +1333,7 @@
                 manuelYillar,
                 sakinBilgileri,
                 kullaniciKayitlari,
+                bankaAktarimAnahtarlari,
                 smsAyarlari: {
                     apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
                     apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
@@ -1330,6 +1365,7 @@
                 manuelYillar: [],
                 sakinBilgileri: {},
                 kullaniciKayitlari: [],
+                bankaAktarimAnahtarlari: [],
                 smsAyarlari: {
                     apiId: '',
                     apiKey: '',
@@ -1909,6 +1945,185 @@
             let p = tarih.split('.');
             if (p.length === 3) return parseInt(p[2]) * 10000 + parseInt(p[1]) * 100 + parseInt(p[0]);
             return 0;
+        }
+
+        function metniNormalizeEt(metin) {
+            return (metin || '')
+                .toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/ı/g, 'i')
+                .replace(/İ/g, 'I')
+                .toLowerCase()
+                .trim();
+        }
+
+        function turkceSayiCoz(metin) {
+            if (typeof metin === 'number') return metin;
+            let temiz = (metin || '').toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+            let sonuc = Number(temiz);
+            return Number.isFinite(sonuc) ? sonuc : 0;
+        }
+
+        function bankaTarihMetni(tarihDegeri) {
+            let metin = (tarihDegeri || '').toString().trim();
+            let eslesme = metin.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+            if (!eslesme) return metin;
+            return `${eslesme[1].padStart(2,'0')}.${eslesme[2].padStart(2,'0')}.${eslesme[3]}`;
+        }
+
+        function bankaAydanKalemBul(metin) {
+            let norm = metniNormalizeEt(metin);
+            for (let ay of aylar) {
+                if (norm.includes(metniNormalizeEt(ay))) return `${ay} Aidatı`;
+            }
+            return 'Diğer';
+        }
+
+        function bankaDaireEslesmesiBul(metin) {
+            let norm = metniNormalizeEt(metin);
+            let numaraEslesmesi = norm.match(/(\d+)\.?\s*daire/);
+            if (numaraEslesmesi) {
+                let numara = numaraEslesmesi[1];
+                let dogrudan = daireListesi.find(d => metniNormalizeEt(d).includes(numara));
+                if (dogrudan) return dogrudan;
+            }
+            for (let daire of daireListesi) {
+                let sakin = sakinBilgileri[daire];
+                if (sakin?.ad && norm.includes(metniNormalizeEt(sakin.ad))) return daire;
+                if (norm.includes(metniNormalizeEt(daire))) return daire;
+            }
+            return 'Diğer';
+        }
+
+        function bankaSatiriAnahtarOlustur(hareket) {
+            return [hareket.dekontNo || '', hareket.tarih || '', hareket.tutar || '', hareket.aciklama || ''].join('|');
+        }
+
+        function bankaTabloBasliginiBul(satirlar) {
+            for (let i = 0; i < satirlar.length; i++) {
+                let satir = satirlar[i].map(x => metniNormalizeEt(x));
+                if (satir.includes('tarih') && satir.includes('tutar') && satir.includes('aciklama')) return i;
+            }
+            return -1;
+        }
+
+        function bankaSatirlariniHazirla(satirlar) {
+            let baslikIndex = bankaTabloBasliginiBul(satirlar);
+            if (baslikIndex === -1) throw new Error('Hareket tablosu bulunamadı');
+            let basliklar = satirlar[baslikIndex].map(h => metniNormalizeEt(h));
+            let kolon = ad => basliklar.indexOf(ad);
+            let tarihKolon = kolon('tarih');
+            let aciklamaKolon = kolon('aciklama');
+            let ozelAciklamaKolon = kolon('islem ozel aciklamasi');
+            if (ozelAciklamaKolon === -1) ozelAciklamaKolon = kolon('islem özel aciklamasi');
+            let tutarKolon = kolon('tutar');
+            let dekontKolon = kolon('dekont no');
+            let aliciKolon = kolon('alici');
+
+            let hareketler = [];
+            for (let i = baslikIndex + 1; i < satirlar.length; i++) {
+                let satir = satirlar[i];
+                let tarih = bankaTarihMetni(satir[tarihKolon]);
+                let aciklama = (satir[aciklamaKolon] || '').toString().trim();
+                let ozelAciklama = ozelAciklamaKolon >= 0 ? (satir[ozelAciklamaKolon] || '').toString().trim() : '';
+                let tutar = turkceSayiCoz(satir[tutarKolon]);
+                if (!tarih && !aciklama && !ozelAciklama && !tutar) continue;
+                if (!tarih || !tutar || tutar <= 0) continue;
+
+                let tamAciklama = [aciklama, ozelAciklama].filter(Boolean).join(' | ');
+                let detay = bankaDaireEslesmesiBul(tamAciklama);
+                let ay = bankaAydanKalemBul(tamAciklama);
+                let dekontNo = dekontKolon >= 0 ? (satir[dekontKolon] || '').toString().trim() : '';
+                let alici = aliciKolon >= 0 ? (satir[aliciKolon] || '').toString().trim() : '';
+                let hareket = {
+                    tarih,
+                    yil: Number(tarih.split('.').pop()),
+                    detay,
+                    ay,
+                    tutar,
+                    aciklama: `Banka aktarımı: ${tamAciklama}${alici ? ' | Alıcı: ' + alici : ''}`.trim(),
+                    dekontNo
+                };
+                hareket.anahtar = bankaSatiriAnahtarOlustur(hareket);
+                hareket.onceAktarildi = bankaAktarimAnahtarlari.includes(hareket.anahtar);
+                hareketler.push(hareket);
+            }
+            return hareketler;
+        }
+
+        async function bankaEkstresiSecildi(event) {
+            let dosya = event.target.files?.[0];
+            if (!dosya) return;
+            try {
+                if (!window.XLSX) throw new Error('Excel okuyucu yüklenemedi');
+                let buffer = await dosya.arrayBuffer();
+                let workbook = XLSX.read(buffer, { type: 'array' });
+                let sayfaAdi = workbook.SheetNames[0];
+                let sayfa = workbook.Sheets[sayfaAdi];
+                let satirlar = XLSX.utils.sheet_to_json(sayfa, { header: 1, raw: false, defval: '' });
+                _hazirBankaHareketleri = bankaSatirlariniHazirla(satirlar);
+                bankaOnizlemeGoster(dosya.name);
+                modalAc('modalBankaIceAktar');
+            } catch (e) {
+                toastGoster('Ekstre okunamadı: ' + e.message, 'hata');
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        function bankaOnizlemeGoster(dosyaAdi = '') {
+            let govde = document.getElementById('bankaIceAktarGovde');
+            let ozet = document.getElementById('bankaIceAktarOzet');
+            if (_hazirBankaHareketleri.length === 0) {
+                govde.innerHTML = '<tr><td colspan="6">Aktarılabilir pozitif hareket bulunamadı.</td></tr>';
+                ozet.textContent = dosyaAdi ? `${dosyaAdi} içinde aktarılacak kayıt bulunamadı.` : 'Aktarılacak kayıt bulunamadı.';
+                return;
+            }
+            let yeniKayit = _hazirBankaHareketleri.filter(h => !h.onceAktarildi).length;
+            let tekrarKayit = _hazirBankaHareketleri.filter(h => h.onceAktarildi).length;
+            ozet.textContent = `${dosyaAdi} dosyasından ${_hazirBankaHareketleri.length} pozitif hareket okundu. ${yeniKayit} yeni, ${tekrarKayit} daha önce aktarılmış kayıt bulundu.`;
+            govde.innerHTML = _hazirBankaHareketleri.map(h => `
+                <tr>
+                    <td>${h.tarih}</td>
+                    <td>${h.detay}</td>
+                    <td>${h.ay}</td>
+                    <td>${h.aciklama}</td>
+                    <td>${paraBiçim(h.tutar)}</td>
+                    <td>${h.onceAktarildi ? 'Daha önce aktarıldı' : 'Hazır'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function bankaHareketleriniIceAktar() {
+            let yeniKayitlar = _hazirBankaHareketleri.filter(h => !h.onceAktarildi);
+            if (yeniKayitlar.length === 0) {
+                toastGoster('İçe aktarılacak yeni banka hareketi yok.', 'uyari');
+                return;
+            }
+            yeniKayitlar.forEach(h => {
+                islemler.push({
+                    tur: 'Gelir',
+                    tutar: h.tutar,
+                    aciklama: h.aciklama,
+                    yil: h.yil,
+                    detay: h.detay,
+                    ay: h.ay,
+                    tarih: h.tarih
+                });
+                bankaAktarimAnahtarlari.push(h.anahtar);
+            });
+            islemler.sort((a, b) => {
+                if(a.yil !== b.yil) return a.yil - b.yil;
+                return tarihSirala(a.tarih) - tarihSirala(b.tarih);
+            });
+            localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            localStorage.setItem(BANKA_AKTARIM_KEY, JSON.stringify(bankaAktarimAnahtarlari));
+            yillariYukle();
+            tablolariGuncelle();
+            modalKapat('modalBankaIceAktar');
+            toastGoster(`${yeniKayitlar.length} banka hareketi içe aktarıldı.`, 'basari');
+            bulutaKaydetKuyrukla(true);
         }
 
         let gelirSayfa = 1, giderSayfa = 1;
