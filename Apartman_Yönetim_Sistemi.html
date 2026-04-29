@@ -927,7 +927,6 @@
                 <button onclick="verileriYedekle()" class="btn-koyu-mavi">💾 Yedekle</button>
                 <button onclick="document.getElementById('yedekDosyasi').click()" class="btn-koyu-mavi">📂 Yükle</button>
                 <button onclick="cikisYap()" class="btn-geri" style="width:auto;">Çıkış Yap</button>
-                <button onclick="sistemiSifirla()" class="btn-danger">🗑️ Verileri Sil</button>
                 <input type="file" id="yedekDosyasi" accept=".json" style="display: none;" onchange="yedektenYukle(event)">
             </div>
         </div>
@@ -1006,6 +1005,15 @@
             <input type="hidden" id="kullaniciDuzenleId">
         </div>
         <div id="kullaniciListeAlani"></div>
+        <div class="kart no-print" style="margin-top:20px; border:1px solid #fecaca; background:#fff5f5;">
+            <div style="display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap;">
+                <div>
+                    <strong style="display:block; color:#b91c1c;">Tehlikeli İşlem</strong>
+                    <span style="color:#7f1d1d; font-size:13px;">Tüm apartman verilerini kalıcı olarak siler.</span>
+                </div>
+                <button onclick="sistemiSifirla()" class="btn-danger" style="width:auto;">🗑️ Verileri Sil</button>
+            </div>
+        </div>
     </div>
 
     <div id="yoneticiPaneli" class="container hidden">
