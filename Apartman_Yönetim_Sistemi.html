@@ -1562,6 +1562,8 @@
                 uygulamayiHazirla();
                 uygulamayiGoster();
                 authDurumunuGuncelle('Giriş başarılı.', 'basari');
+                // shared_data'yı her yönetici girişinde güncelle (sakin girişleri için)
+                uzakDurumuKaydet().catch(() => {});
             } catch (e) {
                 console.warn('Oturum veri yükleme hatası:', e.message);
                 if (!uygulamaVerisiVarMi()) {
