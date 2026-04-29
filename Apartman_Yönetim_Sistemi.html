@@ -1611,6 +1611,8 @@
                 });
                 _authDinleyiciKuruldu = true;
             }
+            // Önce sakin oturumu kayıtlı mı kontrol et
+            if (sakinOturumunuKontrolEt()) return;
             let { data, error } = await _supabase.auth.getSession();
             if (error) {
                 authPaneliniGoster();
@@ -1665,6 +1667,7 @@
                 return;
             }
             _sakinOturumu = { hesap, veri: data.payload };
+            sessionStorage.setItem('sakinOturumu', JSON.stringify(_sakinOturumu));
             sakinPaneliniGoster();
         }
 
@@ -1763,11 +1766,25 @@
 
         function sakinCikis() {
             _sakinOturumu = null;
+            sessionStorage.removeItem('sakinOturumu');
             document.getElementById('sakinGorunumPaneli').classList.add('hidden');
             document.getElementById('authPaneli').classList.remove('hidden');
             document.getElementById('girisEposta').value = '';
             document.getElementById('girisSifre').value = '';
             authDurumunuGuncelle('Çıkış yapıldı.', 'bilgi');
+        }
+
+        function sakinOturumunuKontrolEt() {
+            let kayit = sessionStorage.getItem('sakinOturumu');
+            if (!kayit) return false;
+            try {
+                _sakinOturumu = JSON.parse(kayit);
+                sakinPaneliniGoster();
+                return true;
+            } catch (e) {
+                sessionStorage.removeItem('sakinOturumu');
+                return false;
+            }
         }
         // ─────────────────────────────────────────────────────────────────
 
