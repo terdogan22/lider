@@ -107,6 +107,8 @@
 
         .btn-duzenle { background: #fef3c7; color: var(--sari); border: 1.5px solid #fcd34d; padding: 4px 10px; font-size: 12px; }
         .btn-duzenle:hover { background: #fde68a; }
+        .btn-duzenle-defter { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
+        .btn-duzenle-defter:hover { background: #bfdbfe; }
 
         /* ── PANEL BAŞLIĞI ────────────────────────────────────────────── */
         .panel-header {
@@ -2178,7 +2180,7 @@
             let gelBas = (gelirSayfa-1)*SAYFA_BOYUTU, gidBas = (giderSayfa-1)*SAYFA_BOYUTU;
 
             let gelHtml = "", gidHtml = "";
-            let islemBtn = (idx) => `<div style="display:flex;flex-direction:column;gap:2px;align-items:center;"><button class="btn-duzenle" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemDuzenle(${idx})" title="Düzenle">✎</button><button class="btn-danger" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemSil(${idx})" title="Sil">✕</button></div>`;
+            let islemBtn = (idx) => `<div style="display:flex;flex-direction:column;gap:2px;align-items:center;"><button class="btn-duzenle btn-duzenle-defter" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemDuzenle(${idx})" title="Düzenle">✎</button><button class="btn-danger" style="padding:2px 0;width:38px;font-size:13px;" onclick="islemSil(${idx})" title="Sil">✕</button></div>`;
             gelSayfa.forEach((is, i) => { gelHtml += `<tr><td>${gelBas+i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td><td class="no-print" style="white-space:nowrap">${islemBtn(is.origIdx)}</td></tr>`; });
             gidSayfa.forEach((is, i) => { gidHtml += `<tr><td>${gidBas+i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td><td class="no-print" style="white-space:nowrap">${islemBtn(is.origIdx)}</td></tr>`; });
 
