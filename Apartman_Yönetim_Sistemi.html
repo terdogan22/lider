@@ -2003,7 +2003,6 @@
         }
 
         function ekranDegistir(id) {
-            modalKapat('modalGelirGider');
             const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','kullaniciYonetimPaneli','yoneticiPaneli','gelirGiderPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
             paneller.forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -2023,9 +2022,15 @@
             if(id==='ekButcePaneli') ekButceListesiniCiz();
         }
 
-        function modalAc(id) { document.getElementById(id).classList.remove('hidden'); }
+        function modalAc(id) {
+            let el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+        }
         function modalKapat(id) {
-            document.getElementById(id).classList.add('hidden');
+            let el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('hidden');
             if (id === 'modalWhatsapp') waGonderimBitir();
         }
 
