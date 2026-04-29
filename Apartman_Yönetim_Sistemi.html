@@ -712,16 +712,10 @@
         <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:12px;">
                 <button id="sakinMenuToggle" onclick="sakinMenuToggle()" style="display:none;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 10px;border-radius:8px;font-size:16px;cursor:pointer;">☰</button>
-                <div>
-                    <div style="font-size:10px;opacity:.7;letter-spacing:.08em;text-transform:uppercase;">🏢 Apartman</div>
-                    <div id="sakinAptAd" style="font-size:18px;font-weight:800;color:white;letter-spacing:.02em;">---</div>
-                </div>
+                <div id="sakinAptAd" style="font-size:22px;font-weight:800;color:white;letter-spacing:.02em;">---</div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-                <div style="text-align:right;">
-                    <div id="sakinAd" style="font-size:14px;font-weight:700;color:white;">---</div>
-                    <div id="sakinDaireAd" style="font-size:11px;opacity:.75;color:white;">---</div>
-                </div>
+                <div id="sakinKimlik" style="font-size:13px;font-weight:700;color:white;white-space:nowrap;">---</div>
                 <button id="sakinYenileBtn" onclick="sakinVeriYenile()" title="Verileri yenile" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">🔄</button>
                 <button onclick="sakinCikis()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Çıkış</button>
             </div>
@@ -1676,9 +1670,8 @@
             let { hesap, veri } = _sakinOturumu;
             document.getElementById('authPaneli').classList.add('hidden');
             document.getElementById('sakinGorunumPaneli').classList.remove('hidden');
-            document.getElementById('sakinAptAd').textContent   = veri.aptBilgi?.ad || 'Apartman';
-            document.getElementById('sakinAd').textContent      = hesap.adSoyad || '-';
-            document.getElementById('sakinDaireAd').textContent = hesap.daire || '-';
+            document.getElementById('sakinAptAd').textContent    = veri.aptBilgi?.ad || 'Apartman';
+            document.getElementById('sakinKimlik').textContent  = (hesap.adSoyad || '-') + ' · ' + (hesap.daire || '-');
             // Menüyü oluştur
             let nav = document.getElementById('sakinMenuNav');
             nav.innerHTML = SAKIN_MENU.map(m => `
@@ -1736,7 +1729,7 @@
                 : `<span style="color:#16a34a;font-weight:700;">✅ Borç yok</span>`;
             return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
                         <h2 style="margin:0;font-size:18px;color:#1e3a8a;">📊 Aidat Durumu</h2>
-                        <select onchange="sakinYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:6px 12px;background:#eff6ff;cursor:pointer;">${yilSecOpt}</select>
+                        <select onchange="sakinYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:4px 8px;background:#eff6ff;cursor:pointer;width:80px;">${yilSecOpt}</select>
                     </div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
                         <div style="background:white;border-radius:10px;padding:12px 18px;border:1px solid #e2e8f0;flex:1;min-width:140px;">
@@ -1787,7 +1780,7 @@
             let icerik = sakinFinansIcerik(veri, yillar[0]);
             return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
                         <h2 style="margin:0;font-size:18px;color:#1e3a8a;">💰 Finansal Özet</h2>
-                        <select onchange="sakinFinansYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:6px 12px;background:#eff6ff;cursor:pointer;">${yilSecOpt}</select>
+                        <select onchange="sakinFinansYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:4px 8px;background:#eff6ff;cursor:pointer;width:80px;">${yilSecOpt}</select>
                     </div>
                     <div id="sakinFinansKap" style="max-width:480px;display:grid;gap:8px;">${icerik}</div>`;
         }
