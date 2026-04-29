@@ -1224,6 +1224,37 @@
             return UYGULAMA_LOCAL_KEYS.some(key => localStorage.getItem(key));
         }
 
+        function varsayilanVeriyiOlustur() {
+            return {
+                aptBilgi: { ad: "" },
+                daireListesi: ["Daire 1", "Daire 2"],
+                islemler: [],
+                aidatAyarlari: {},
+                ekButceAyarlari: {},
+                manuelYillar: [],
+                sakinBilgileri: {},
+                smsAyarlari: {
+                    apiId: '',
+                    apiKey: '',
+                    sender: '',
+                    sablon: localStorage.getItem('vatanSmsSablon') || ''
+                },
+                meta: { updatedAt: Date.now() }
+            };
+        }
+
+        async function zamanAsimliCalistir(promise, ms, hataMesaji) {
+            let timeoutId;
+            let timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error(hataMesaji)), ms);
+            });
+            try {
+                return await Promise.race([promise, timeoutPromise]);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
         function uygulamaVerisiDegisti(key) {
             if (_depoyaYazimAskida || !_uygulamaHazir) return;
             if (key !== '*' && !UYGULAMA_LOCAL_KEYS.includes(key)) return;
@@ -1279,7 +1310,11 @@
         async function uzaktakiVeriyiYukle() {
             if (!_supabase || !_oturum) return;
             let yerelZaman = yerelVeriZamaniniOku();
-            let { data, error } = await _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle();
+            let { data, error } = await zamanAsimliCalistir(
+                _supabase.from('app_state').select('payload, updated_at').eq('user_id', _oturum.user.id).maybeSingle(),
+                12000,
+                'Supabase yanıt vermedi'
+            );
             if (error) throw error;
             let uzakZaman = data?.updated_at ? new Date(data.updated_at).getTime() : 0;
             if (data?.payload && gecerliYedekVerisiMi(data.payload) && uzakZaman >= yerelZaman) {
@@ -1287,8 +1322,14 @@
                 senkronDurumunuGuncelle('Buluttaki veri yüklendi', 'basari');
                 return;
             }
-            verileriYukle();
-            if (uygulamaVerisiVarMi()) await uzakDurumuKaydet();
+            if (!data?.payload && !uygulamaVerisiVarMi()) {
+                veriyiYereldeUygula(varsayilanVeriyiOlustur(), Date.now());
+            } else {
+                verileriYukle();
+            }
+            if (uygulamaVerisiVarMi()) {
+                await zamanAsimliCalistir(uzakDurumuKaydet(), 12000, 'Buluta yazma zaman aşımına uğradı');
+            }
         }
 
         async function oturumuHazirla(session) {
@@ -1300,10 +1341,23 @@
                 return;
             }
             authDurumunuGuncelle('Veriler yükleniyor...', 'bekliyor');
-            await uzaktakiVeriyiYukle();
-            uygulamayiHazirla();
-            uygulamayiGoster();
-            authDurumunuGuncelle('Giriş başarılı.', 'basari');
+            try {
+                await uzaktakiVeriyiYukle();
+                uygulamayiHazirla();
+                uygulamayiGoster();
+                authDurumunuGuncelle('Giriş başarılı.', 'basari');
+            } catch (e) {
+                console.warn('Oturum veri yükleme hatası:', e.message);
+                if (!uygulamaVerisiVarMi()) {
+                    veriyiYereldeUygula(varsayilanVeriyiOlustur(), Date.now());
+                } else {
+                    verileriYukle();
+                }
+                uygulamayiHazirla();
+                uygulamayiGoster();
+                senkronDurumunuGuncelle('Bulut bağlantı hatası', 'hata');
+                toastGoster('Bulut verisi yüklenemedi: ' + e.message, 'hata');
+            }
         }
 
         async function supabaseBaslat() {
