@@ -2784,7 +2784,7 @@
             let h = '<option value="Diğer">Daire Ödemesi (Diğer)</option>' + aylar.map(a => `<option value="${a} Aidatı">${a} Aidatı</option>`).join('');
             Object.keys(ekButceAyarlari).forEach(ad => { for(let t=1; t<=ekButceAyarlari[ad].taksit; t++) h += `<option value="${ad} - ${t}. Taksit">${ad} - ${t}. Taksit</option>`; });
             document.getElementById('ilgiliAySecimi').innerHTML = h;
-            let g = ["Elektrik", "Su", "Temizlik", "Asansör", "Tamir", "Diğer"].map(x => `<option value="${x} Gideri">${x} Gideri</option>`).join('');
+            let g = ["Elektrik", "Su", "Temizlik", "Asansör", "Tamir", "Bahçe Bakımı", "Logar Temizliği", "Asansör Tamiri", "Diğer"].map(x => `<option value="${x} Gideri">${x} Gideri</option>`).join('');
             Object.keys(ekButceAyarlari).forEach(ad => g += `<option value="${ad} Gideri">${ad} Gideri</option>`);
             document.getElementById('giderTuruSecimi').innerHTML = g;
         }
