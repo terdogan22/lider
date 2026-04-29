@@ -2061,6 +2061,7 @@
             let sirali = Array.from(yillar).sort((a,b) => b-a);
             ['yilSecimiDefter','yilSecimiAidat','yilSecimiAyarlar','yilSecimiEkButce'].forEach(sId => {
                 let s = document.getElementById(sId);
+                if (!s) return;
                 s.innerHTML = sirali.map(y => `<option value="${y}">${y} Yılı</option>`).join('');
             });
         }
@@ -2349,7 +2350,6 @@
             let tur = document.getElementById('islemTuru').value;
             let tutar = parseFloat(document.getElementById('islemTutari').value);
             let acik = document.getElementById('islemAciklamasi').value.trim();
-            let yil = parseInt(document.getElementById('yilSecimiDefter').value);
             let detay = tur === 'Gelir' ? document.getElementById('ilgiliDaire').value : document.getElementById('giderTuruSecimi').value;
             let ay = tur === 'Gelir' ? document.getElementById('ilgiliAySecimi').value : "";
             
@@ -2358,7 +2358,15 @@
 
             // Seçilen tarihi al
             let secilenTarihRaw = document.getElementById('islemTarihiInput').value;
-            let tarihObj = secilenTarihRaw ? new Date(secilenTarihRaw) : new Date();
+            let tarihObj, yil;
+            if (secilenTarihRaw) {
+                let [yilParcasi, ayParcasi, gunParcasi] = secilenTarihRaw.split('-').map(Number);
+                tarihObj = new Date(yilParcasi, ayParcasi - 1, gunParcasi);
+                yil = yilParcasi;
+            } else {
+                tarihObj = new Date();
+                yil = tarihObj.getFullYear();
+            }
             let formatliTarih = tarihObj.toLocaleDateString('tr-TR');
 
             islemler.push({ tur, tutar, aciklama: acik, yil, detay, ay, tarih: formatliTarih });
@@ -2367,6 +2375,8 @@
                 return tarihSirala(a.tarih) - tarihSirala(b.tarih);
             });
             localStorage.setItem('apartmanIslemleri', JSON.stringify(islemler));
+            yillariYukle();
+            document.getElementById('yilSecimiDefter').value = String(yil);
             tablolariGuncelle();
             document.getElementById('islemTutari').value = "";
             document.getElementById('islemAciklamasi').value = "";
@@ -3150,312 +3160,6 @@
         }
         function exceleAktar() { let csv = "\uFEFFTur;Tarih;Detay;Kalem;Aciklama;Tutar\n"; islemler.forEach(is => csv += `${is.tur};${is.tarih};${is.detay};${is.ay};${is.aciklama};${is.tutar}\n`); let b = new Blob([csv], { type: 'text/csv' }); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `Defter.csv`; a.click(); }
 
-        /*
-        // ── OTOMATİK KLASÖR YEDEKLEME ──────────────────────────────────
-        const VERI_GUNCELLEME_KEY = 'apartmanVeriSonGuncelleme';
-        let _yedekKlasorHandle = null;
-        let _yedekKlasorAdi = localStorage.getItem('apartmanOtomatikYedekKlasorAdi') || '';
-        let _yedekIzinBekliyor = false;
-
-        // Sayfa yüklenince kayıtlı klasör varsa ilk kullanıcı tıklamasında otomatik izin iste
-        document.addEventListener('click', async function _otomatikIzinIste() {
-            if (!_yedekIzinBekliyor || !_yedekKlasorHandle) return;
-            _yedekIzinBekliyor = false;
-            document.removeEventListener('click', _otomatikIzinIste);
-            try {
-                if (await yedekKlasorIzniVarMi(_yedekKlasorHandle, true)) {
-                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
-                    await otomatikYedegiEsitle();
-                } else {
-                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi);
-                }
-            } catch(e) {
-                console.warn('Otomatik izin isteği başarısız:', e.message);
-            }
-        });
-        const YEDEK_DB_ADI = 'apartman-otomatik-yedek-db';
-        const YEDEK_DB_MAGAZA = 'ayarlar';
-        const YEDEK_DB_ANAHTAR = 'yedek-klasor-handle';
-
-        function yerelVeriZamaniniOku() {
-            return Number(localStorage.getItem(VERI_GUNCELLEME_KEY) || 0) || 0;
-        }
-
-        function veriDegisikliginiIsaretle(zaman = Date.now()) {
-            localStorage.setItem(VERI_GUNCELLEME_KEY, String(zaman));
-            return zaman;
-        }
-
-        function gecerliYedekVerisiMi(veri) {
-            return !!(veri && Array.isArray(veri.daireListesi) && Array.isArray(veri.islemler));
-        }
-
-        function yedekVeriZamaniniOku(veri) {
-            return Number(veri?.meta?.updatedAt || veri?.updatedAt || 0) || 0;
-        }
-
-        function veriPaketiOlustur(guncellemeZamani = null) {
-            let updatedAt = guncellemeZamani || yerelVeriZamaniniOku() || Date.now();
-            return {
-                aptBilgi,
-                daireListesi,
-                islemler,
-                aidatAyarlari,
-                ekButceAyarlari,
-                manuelYillar,
-                sakinBilgileri,
-                kullaniciKayitlari,
-                smsAyarlari: {
-                    apiId: localStorage.getItem(SMS_API_ID_KEY) || '',
-                    apiKey: localStorage.getItem(SMS_API_KEY_KEY) || '',
-                    sender: localStorage.getItem(SMS_SENDER_KEY) || '',
-                    sablon: localStorage.getItem('vatanSmsSablon') || ''
-                },
-                meta: { updatedAt }
-            };
-        }
-
-        function veriyiYereldeUygula(veri, guncellemeZamani = null) {
-            localStorage.setItem('aptBilgi', JSON.stringify(veri.aptBilgi || {}));
-            localStorage.setItem('apartmanDaireListesi', JSON.stringify(veri.daireListesi || []));
-            localStorage.setItem('apartmanIslemleri', JSON.stringify(veri.islemler || []));
-            localStorage.setItem('apartmanAidatAyarlari', JSON.stringify(veri.aidatAyarlari || {}));
-            localStorage.setItem('apartmanEkButceAyarlari', JSON.stringify(veri.ekButceAyarlari || {}));
-            localStorage.setItem('apartmanManuelYillar', JSON.stringify(veri.manuelYillar || []));
-            localStorage.setItem('apartmanSakinleri', JSON.stringify(veri.sakinBilgileri || {}));
-            localStorage.setItem('apartmanKullanicilari', JSON.stringify(veri.kullaniciKayitlari || []));
-
-            let smsAyarlari = veri.smsAyarlari || {};
-            if (smsAyarlari.apiId) localStorage.setItem(SMS_API_ID_KEY, smsAyarlari.apiId);
-            else localStorage.removeItem(SMS_API_ID_KEY);
-            if (smsAyarlari.apiKey) localStorage.setItem(SMS_API_KEY_KEY, smsAyarlari.apiKey);
-            else localStorage.removeItem(SMS_API_KEY_KEY);
-            if (smsAyarlari.sender) localStorage.setItem(SMS_SENDER_KEY, smsAyarlari.sender);
-            else localStorage.removeItem(SMS_SENDER_KEY);
-            if (smsAyarlari.sablon) localStorage.setItem('vatanSmsSablon', smsAyarlari.sablon);
-            else localStorage.removeItem('vatanSmsSablon');
-
-            veriDegisikliginiIsaretle(guncellemeZamani || yedekVeriZamaniniOku(veri) || Date.now());
-        }
-
-        async function otomatikYedekDosyaHandleBul(olustur = false) {
-            if (!_yedekKlasorHandle) return null;
-            let dosyaAdi = (aptBilgi.ad || 'Apartman') + '_OtomatikYedek.json';
-            try {
-                return await _yedekKlasorHandle.getFileHandle(dosyaAdi, { create: olustur });
-            } catch (e) {
-                if (olustur || e.name !== 'NotFoundError') throw e;
-            }
-            for await (const entry of _yedekKlasorHandle.values()) {
-                if (entry.kind === 'file' && entry.name.endsWith('_OtomatikYedek.json')) return entry;
-            }
-            return null;
-        }
-
-        async function otomatikYedegiOku() {
-            let dosyaHandle = await otomatikYedekDosyaHandleBul(false);
-            if (!dosyaHandle) return null;
-            let dosya = await dosyaHandle.getFile();
-            let icerik = await dosya.text();
-            if (!icerik.trim()) return null;
-            let veri = JSON.parse(icerik);
-            if (!gecerliYedekVerisiMi(veri)) throw new Error('otomatik-yedek-gecersiz');
-            return veri;
-        }
-
-        async function otomatikYedegiEsitle() {
-            if (!_yedekKlasorHandle) return;
-            if (!await yedekKlasorIzniVarMi(_yedekKlasorHandle, false)) {
-                otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
-                return;
-            }
-            try {
-                let yerelZaman = yerelVeriZamaniniOku();
-                let yedekVeri = await otomatikYedegiOku();
-                let yedekZaman = yedekVeriZamaniniOku(yedekVeri);
-
-                if (yedekVeri && yedekZaman > yerelZaman) {
-                    veriyiYereldeUygula(yedekVeri, yedekZaman);
-                    otomatikYedekDurumunuGuncelle('Daha yeni yedek yüklendi ✔', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
-                    location.reload();
-                    return;
-                }
-
-                if (yerelZaman > 0 || yedekVeri === null) {
-                    await otomatikYedekAl(yerelZaman || veriDegisikliginiIsaretle());
-                }
-            } catch (e) {
-                console.warn('Otomatik yedek senkron hatası:', e.message);
-            }
-        }
-
-        function yedekDbAc() {
-            return new Promise((resolve, reject) => {
-                if (!window.indexedDB) {
-                    reject(new Error('indexeddb-desteklenmiyor'));
-                    return;
-                }
-                let istek = indexedDB.open(YEDEK_DB_ADI, 1);
-                istek.onupgradeneeded = () => {
-                    let db = istek.result;
-                    if (!db.objectStoreNames.contains(YEDEK_DB_MAGAZA)) db.createObjectStore(YEDEK_DB_MAGAZA);
-                };
-                istek.onsuccess = () => resolve(istek.result);
-                istek.onerror = () => reject(istek.error || new Error('indexeddb-acilamadi'));
-            });
-        }
-
-        async function yedekHandleKaydet(handle) {
-            let db = await yedekDbAc();
-            await new Promise((resolve, reject) => {
-                let tx = db.transaction(YEDEK_DB_MAGAZA, 'readwrite');
-                tx.objectStore(YEDEK_DB_MAGAZA).put(handle, YEDEK_DB_ANAHTAR);
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error || new Error('yedek-handle-kaydedilemedi'));
-                tx.onabort = () => reject(tx.error || new Error('yedek-handle-kaydedilemedi'));
-            });
-            db.close();
-            _yedekKlasorAdi = handle?.name || '';
-            localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
-        }
-
-        async function yedekHandleYukle() {
-            let db = await yedekDbAc();
-            let handle = await new Promise((resolve, reject) => {
-                let tx = db.transaction(YEDEK_DB_MAGAZA, 'readonly');
-                let istek = tx.objectStore(YEDEK_DB_MAGAZA).get(YEDEK_DB_ANAHTAR);
-                istek.onsuccess = () => resolve(istek.result || null);
-                istek.onerror = () => reject(istek.error || new Error('yedek-handle-okunamadi'));
-            });
-            db.close();
-            return handle;
-        }
-
-        async function yedekHandleTemizle() {
-            if (window.indexedDB) {
-                try {
-                    let db = await yedekDbAc();
-                    await new Promise((resolve, reject) => {
-                        let tx = db.transaction(YEDEK_DB_MAGAZA, 'readwrite');
-                        tx.objectStore(YEDEK_DB_MAGAZA).delete(YEDEK_DB_ANAHTAR);
-                        tx.oncomplete = resolve;
-                        tx.onerror = () => reject(tx.error || new Error('yedek-handle-silinemedi'));
-                        tx.onabort = () => reject(tx.error || new Error('yedek-handle-silinemedi'));
-                    });
-                    db.close();
-                } catch (e) {
-                    console.warn('Yedek klasör kaydı temizlenemedi:', e.message);
-                }
-            }
-            _yedekKlasorHandle = null;
-            _yedekKlasorAdi = '';
-            localStorage.removeItem('apartmanOtomatikYedekKlasorAdi');
-        }
-
-        async function yedekKlasorIzniVarMi(handle, izinIste = false) {
-            if (!handle) return false;
-            try {
-                let opts = { mode: 'readwrite' };
-                if (await handle.queryPermission(opts) === 'granted') return true;
-                if (izinIste && await handle.requestPermission(opts) === 'granted') return true;
-            } catch (e) {
-                console.warn('Yedek klasör izin kontrolü başarısız:', e.message);
-            }
-            return false;
-        }
-
-        async function otomatikYedekKlasorunuYukle() {
-            if (_yedekKlasorAdi) otomatikYedekDurumunuGuncelle('Klasör kayıtlı', _yedekKlasorAdi);
-            try {
-                let handle = await yedekHandleYukle();
-                if (!handle) return;
-                _yedekKlasorHandle = handle;
-                _yedekKlasorAdi = handle.name || _yedekKlasorAdi || '';
-                localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
-
-                if (await yedekKlasorIzniVarMi(handle, false)) {
-                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
-                    await otomatikYedegiEsitle();
-                } else {
-                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki bekleniyor...', _yedekKlasorAdi);
-                    _yedekIzinBekliyor = true;
-                }
-            } catch (e) {
-                console.warn('Kayıtlı yedek klasörü yüklenemedi:', e.message);
-                if (_yedekKlasorAdi) otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yeniden bağlayın', _yedekKlasorAdi);
-            }
-        }
-
-        async function otomatikKlasorSec() {
-            if (!window.showDirectoryPicker) {
-                bildir({
-                    baslik: 'Desteklenmeyen Tarayıcı',
-                    mesaj: 'Otomatik yedekleme özelliği yalnızca Chrome veya Edge tarayıcısında çalışmaktadır.\n\nLütfen Chrome veya Edge kullanın.',
-                    ikon: '🌐',
-                    kapatMetin: 'Anladım'
-                });
-                return;
-            }
-            try {
-                if (_yedekKlasorHandle && await yedekKlasorIzniVarMi(_yedekKlasorHandle, true)) {
-                    _yedekKlasorAdi = _yedekKlasorHandle.name || _yedekKlasorAdi || '';
-                    otomatikYedekDurumunuGuncelle('Klasör hazır ✔', _yedekKlasorAdi);
-                    await otomatikYedegiEsitle();
-                    return;
-                }
-                _yedekKlasorHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                await yedekHandleKaydet(_yedekKlasorHandle);
-                otomatikYedekDurumunuGuncelle('Klasör seçildi ✔', _yedekKlasorHandle.name);
-                await otomatikYedegiEsitle();
-            } catch(e) {
-                if (e.name !== 'AbortError') {
-                    bildir({
-                        baslik: 'Klasör Seçilemedi',
-                        mesaj: 'Klasör seçme işlemi başarısız oldu.\n\nHata: ' + e.message,
-                        ikon: '❌',
-                        kapatMetin: 'Tamam'
-                    });
-                }
-            }
-        }
-
-        async function otomatikYedekAl(guncellemeZamani = null) {
-            if (!_yedekKlasorHandle) return;
-            try {
-                if (!await yedekKlasorIzniVarMi(_yedekKlasorHandle, false)) {
-                    otomatikYedekDurumunuGuncelle('Klasör kayıtlı — yetki için butona tıklayın', _yedekKlasorAdi || _yedekKlasorHandle.name || '');
-                    return;
-                }
-                let veri = veriPaketiOlustur(guncellemeZamani);
-                let dosyaHandle = await otomatikYedekDosyaHandleBul(true);
-                let yazici = await dosyaHandle.createWritable();
-                await yazici.write(JSON.stringify(veri, null, 2));
-                await yazici.close();
-                let simdi = new Date().toLocaleString('tr-TR');
-                _yedekKlasorAdi = _yedekKlasorHandle.name || _yedekKlasorAdi || '';
-                localStorage.setItem('apartmanOtomatikYedekKlasorAdi', _yedekKlasorAdi);
-                otomatikYedekDurumunuGuncelle('✅ Son yedek: ' + simdi, _yedekKlasorHandle.name);
-            } catch(e) {
-                console.warn('Otomatik yedek hatası:', e.message);
-            }
-        }
-
-        function otomatikYedekDurumunuGuncelle(zaman, klasorAdi) {
-            let durum = document.getElementById('otomatikYedekDurumu');
-            let klasorEl = document.getElementById('otomatikYedekKlasor');
-            let zamanEl = document.getElementById('otomatikYedekZaman');
-            if (durum && klasorEl && zamanEl) {
-                durum.style.display = 'block';
-                klasorEl.textContent = '📂 ' + (klasorAdi || '');
-                zamanEl.textContent = zaman;
-            }
-        }
-
-        // ───────────────────────────────────────────────────────────────
-
-
-        // ── TOPLU ÖDEME ─────────────────────────────────────────────────
-        */
         function topluOdemeModalAc() {
             // Daireler
             let dDaire = document.getElementById('topluDaire');
