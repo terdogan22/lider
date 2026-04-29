@@ -706,39 +706,37 @@
     </div>
 
     <!-- SAKİN GÖRÜNÜM PANELİ -->
-    <div id="sakinGorunumPaneli" class="hidden no-print" style="min-height:100vh;background:#f0f4f8;padding:24px 12px;">
-        <div style="max-width:520px;margin:0 auto;">
-            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:18px;padding:22px 24px;color:white;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div id="sakinGorunumPaneli" class="hidden no-print" style="display:flex;flex-direction:column;min-height:100vh;background:#f0f4f8;">
+
+        <!-- ÜST BAŞLIK -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <button id="sakinMenuToggle" onclick="sakinMenuToggle()" style="display:none;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 10px;border-radius:8px;font-size:16px;cursor:pointer;">☰</button>
                 <div>
-                    <div style="font-size:11px;opacity:.75;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">🏢 Apartman</div>
-                    <div id="sakinAptAd" style="font-size:20px;font-weight:800;letter-spacing:.02em;">---</div>
-                </div>
-                <button onclick="sakinCikis()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Çıkış</button>
-            </div>
-            <div style="background:white;border-radius:14px;padding:18px 20px;margin-bottom:14px;border:1px solid #e2e8f0;">
-                <div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">👤 Hesap Bilgileri</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                    <div><span style="font-size:11px;color:#94a3b8;">Ad Soyad</span><div id="sakinAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
-                    <div><span style="font-size:11px;color:#94a3b8;">Daire / Bölüm</span><div id="sakinDaireAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
-                    <div><span style="font-size:11px;color:#94a3b8;">Telefon</span><div id="sakinTelAd" style="font-weight:700;color:#1e293b;font-size:15px;">---</div></div>
-                    <div><span style="font-size:11px;color:#94a3b8;">Toplam Borç</span><div id="sakinToplamBorc" style="font-weight:800;color:#dc2626;font-size:16px;">---</div></div>
+                    <div style="font-size:10px;opacity:.7;letter-spacing:.08em;text-transform:uppercase;">🏢 Apartman</div>
+                    <div id="sakinAptAd" style="font-size:18px;font-weight:800;color:white;letter-spacing:.02em;">---</div>
                 </div>
             </div>
-            <div style="background:white;border-radius:14px;padding:18px 20px;border:1px solid #e2e8f0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                    <div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">📊 Aidat Durumu</div>
-                    <select id="sakinYilSecimi" onchange="sakinAidatGuncelle()" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:4px 10px;background:#eff6ff;cursor:pointer;"></select>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="text-align:right;">
+                    <div id="sakinAd" style="font-size:14px;font-weight:700;color:white;">---</div>
+                    <div id="sakinDaireAd" style="font-size:11px;opacity:.75;color:white;">---</div>
                 </div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px;padding:0 2px;">
-                    <span>Aylık aidat: <b id="sakinAylikAidat" style="color:#1e40af;">---</b></span>
-                </div>
-                <div id="sakinAidatListesi" style="display:grid;gap:6px;"></div>
+                <button onclick="sakinCikis()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Çıkış</button>
             </div>
-            <!-- FİNANSAL ÖZET -->
-            <div style="background:white;border-radius:14px;padding:18px 20px;margin-top:14px;border:1px solid #e2e8f0;">
-                <div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;">💰 Apartman Finansal Özeti</div>
-                <div id="sakinFinansOzeti" style="display:grid;gap:8px;"></div>
+        </div>
+
+        <!-- GÖVDE: SOL MENÜ + İÇERİK -->
+        <div style="display:flex;flex:1;overflow:hidden;">
+
+            <!-- SOL MENÜ -->
+            <div id="sakinSolMenu" style="width:220px;background:white;border-right:1px solid #e2e8f0;padding:16px 10px;flex-shrink:0;overflow-y:auto;">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:.08em;text-transform:uppercase;padding:0 8px;margin-bottom:8px;">MENÜ</div>
+                <nav id="sakinMenuNav" style="display:flex;flex-direction:column;gap:2px;"></nav>
             </div>
+
+            <!-- SAĞ İÇERİK -->
+            <div id="sakinIcerik" style="flex:1;overflow-y:auto;padding:24px;"></div>
         </div>
     </div>
 
@@ -1644,12 +1642,19 @@
         }
 
         // ── SAKİN GİRİŞ SİSTEMİ ─────────────────────────────────────────
-        let _sakinOturumu = null;
+        let _sakinOturumu  = null;
+        let _sakinAktifSayfa = 'hesabim';
+
+        // Menü tanımları — ileride buraya yeni satır eklemek yeterli
+        const SAKIN_MENU = [
+            { id: 'hesabim',   ikon: '👤', baslik: 'Hesabım'           },
+            { id: 'aidat',     ikon: '📊', baslik: 'Aidat Durumu'      },
+            { id: 'finans',    ikon: '💰', baslik: 'Finansal Özet'     },
+        ];
 
         async function sakinGirisYap(telefonHam, sifre) {
             authDurumunuGuncelle('Giriş yapılıyor...', 'bekliyor');
             let telefon = telefonuNormalizeEt(telefonHam);
-            // shared_data'dan veri çek (public erişim, auth gerekmez)
             let { data, error } = await _supabase.from('shared_data').select('payload').eq('id', 1).maybeSingle();
             if (error || !data?.payload) {
                 authDurumunuGuncelle('Veriler yüklenemedi. Yönetici henüz senkron yapmamış olabilir.', 'hata');
@@ -1657,15 +1662,9 @@
             }
             let liste = data.payload.kullaniciKayitlari || [];
             let hesap = liste.find(k => k.telefon === telefon);
-            if (!hesap) {
-                authDurumunuGuncelle('Bu telefon numarasına kayıtlı kullanıcı bulunamadı.', 'hata');
-                return;
-            }
+            if (!hesap) { authDurumunuGuncelle('Bu telefon numarasına kayıtlı kullanıcı bulunamadı.', 'hata'); return; }
             let sifreOzeti = await sifreyiOzetle(sifre);
-            if (sifreOzeti !== hesap.sifreOzeti) {
-                authDurumunuGuncelle('Şifre hatalı.', 'hata');
-                return;
-            }
+            if (sifreOzeti !== hesap.sifreOzeti) { authDurumunuGuncelle('Şifre hatalı.', 'hata'); return; }
             _sakinOturumu = { hesap, veri: data.payload };
             sessionStorage.setItem('sakinOturumu', JSON.stringify(_sakinOturumu));
             sakinPaneliniGoster();
@@ -1676,92 +1675,156 @@
             let { hesap, veri } = _sakinOturumu;
             document.getElementById('authPaneli').classList.add('hidden');
             document.getElementById('sakinGorunumPaneli').classList.remove('hidden');
-            document.getElementById('sakinAptAd').textContent  = veri.aptBilgi?.ad || 'Apartman';
-            document.getElementById('sakinAd').textContent     = hesap.adSoyad || '-';
+            document.getElementById('sakinAptAd').textContent   = veri.aptBilgi?.ad || 'Apartman';
+            document.getElementById('sakinAd').textContent      = hesap.adSoyad || '-';
             document.getElementById('sakinDaireAd').textContent = hesap.daire || '-';
-            document.getElementById('sakinTelAd').textContent  = hesap.telefon || '-';
-            // Yıl seçimi
-            let yilSec = document.getElementById('sakinYilSecimi');
-            let yillar = veri.manuelYillar?.length ? veri.manuelYillar : [new Date().getFullYear()];
-            yilSec.innerHTML = [...yillar].sort((a,b)=>b-a).map(y => `<option value="${y}">${y}</option>`).join('');
-            sakinAidatGuncelle();
+            // Menüyü oluştur
+            let nav = document.getElementById('sakinMenuNav');
+            nav.innerHTML = SAKIN_MENU.map(m => `
+                <button id="sakinMenuBtn_${m.id}" onclick="sakinSayfaAc('${m.id}')"
+                    style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;border:none;width:100%;text-align:left;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s;background:transparent;color:#334155;">
+                    <span style="font-size:17px;">${m.ikon}</span>${m.baslik}
+                </button>`).join('');
+            sakinSayfaAc(_sakinAktifSayfa);
         }
 
-        function sakinAidatGuncelle() {
-            if (!_sakinOturumu) return;
+        function sakinSayfaAc(sayfaId) {
+            _sakinAktifSayfa = sayfaId;
+            // Menü butonlarını güncelle
+            SAKIN_MENU.forEach(m => {
+                let btn = document.getElementById('sakinMenuBtn_' + m.id);
+                if (!btn) return;
+                btn.style.background = m.id === sayfaId ? '#eff6ff' : 'transparent';
+                btn.style.color      = m.id === sayfaId ? '#1e40af' : '#334155';
+                btn.style.fontWeight = m.id === sayfaId ? '700'     : '600';
+            });
+            // İçeriği göster
+            let ic = document.getElementById('sakinIcerik');
+            if      (sayfaId === 'hesabim') ic.innerHTML = sakinHesabimHtml();
+            else if (sayfaId === 'aidat')   ic.innerHTML = sakinAidatHtml();
+            else if (sayfaId === 'finans')  ic.innerHTML = sakinFinansHtml();
+        }
+
+        /* ── SAYFA: HESABIM ── */
+        function sakinHesabimHtml() {
+            let { hesap } = _sakinOturumu;
+            return `<h2 style="margin:0 0 18px;font-size:18px;color:#1e3a8a;">👤 Hesabım</h2>
+            <div style="background:white;border-radius:14px;padding:20px 24px;border:1px solid #e2e8f0;max-width:480px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    ${sakinBilgiSatiri('Ad Soyad', hesap.adSoyad)}
+                    ${sakinBilgiSatiri('Daire / Bölüm', hesap.daire)}
+                    ${sakinBilgiSatiri('Telefon (Kullanıcı Adı)', hesap.telefon)}
+                </div>
+            </div>`;
+        }
+        function sakinBilgiSatiri(etiket, deger) {
+            return `<div><div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">${etiket}</div>
+                <div style="font-size:15px;font-weight:700;color:#1e293b;">${deger || '-'}</div></div>`;
+        }
+
+        /* ── SAYFA: AİDAT DURUMU ── */
+        function sakinAidatHtml() {
             let { hesap, veri } = _sakinOturumu;
-            let yil = parseInt(document.getElementById('sakinYilSecimi').value);
+            let yillar = veri.manuelYillar?.length ? [...veri.manuelYillar].sort((a,b)=>b-a) : [new Date().getFullYear()];
+            let yilSecOpt = yillar.map(y => `<option value="${y}">${y}</option>`).join('');
+            let secilenYil = yillar[0];
+            // Hesapla
+            let { html: listeHtml, toplamBorc, aylik } = sakinAidatHesapla(hesap, veri, secilenYil);
+            let borcMetni = toplamBorc > 0
+                ? `<span style="color:#dc2626;font-weight:800;">${toplamBorc.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span>`
+                : `<span style="color:#16a34a;font-weight:700;">✅ Borç yok</span>`;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                        <h2 style="margin:0;font-size:18px;color:#1e3a8a;">📊 Aidat Durumu</h2>
+                        <select onchange="sakinYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:6px 12px;background:#eff6ff;cursor:pointer;">${yilSecOpt}</select>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                        <div style="background:white;border-radius:10px;padding:12px 18px;border:1px solid #e2e8f0;flex:1;min-width:140px;">
+                            <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;">Aylık Aidat</div>
+                            <div style="font-size:16px;font-weight:800;color:#1e40af;margin-top:4px;">${aylik ? aylik.toLocaleString('tr-TR')+' TL' : 'Tanımsız'}</div>
+                        </div>
+                        <div style="background:white;border-radius:10px;padding:12px 18px;border:1px solid #e2e8f0;flex:1;min-width:140px;">
+                            <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;">Toplam Borç</div>
+                            <div style="font-size:16px;margin-top:4px;">${borcMetni}</div>
+                        </div>
+                    </div>
+                    <div id="sakinAidatListeKap" style="display:grid;gap:6px;max-width:480px;">${listeHtml}</div>`;
+        }
+        function sakinYilDegisti(sel) {
+            let yil = parseInt(sel.value);
+            let { hesap, veri } = _sakinOturumu;
+            let { html, toplamBorc, aylik } = sakinAidatHesapla(hesap, veri, yil);
+            document.getElementById('sakinAidatListeKap').innerHTML = html;
+        }
+        function sakinAidatHesapla(hesap, veri, yil) {
             let ayarlar = (veri.aidatAyarlari || {})[yil] || {};
             let aylik = ayarlar[hesap.daire] || 0;
-            document.getElementById('sakinAylikAidat').textContent = aylik ? aylik.toLocaleString('tr-TR') + ' TL' : 'Tanımsız';
             let simdi = new Date(), sYil = simdi.getFullYear(), sAy = simdi.getMonth();
             let toplamBorc = 0;
             let _aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
             let html = _aylar.map((ay, idx) => {
                 let gelecek = yil > sYil || (yil === sYil && idx > sAy);
-                if (aylik === 0) {
-                    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;">
-                        <span style="font-weight:600;color:#334155;">${ay}</span>
-                        <span style="font-size:12px;color:#94a3b8;">Aidat tanımsız</span></div>`;
-                }
-                let kalem = ay + ' Aidatı';
+                if (aylik === 0) return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;"><span style="font-weight:600;color:#334155;">${ay}</span><span style="font-size:12px;color:#94a3b8;">Aidat tanımsız</span></div>`;
+                let kalem  = ay + ' Aidatı';
                 let odenen = (veri.islemler || []).filter(i => i.yil===yil && i.detay===hesap.daire && i.ay===kalem).reduce((s,i)=>s+i.tutar,0);
-                let borc = Math.max(0, aylik - odenen);
+                let borc   = Math.max(0, aylik - odenen);
                 if (!gelecek) toplamBorc += borc;
-                let renk   = gelecek ? '#f8fafc' : (borc === 0 ? '#f0fdf4' : '#fff7f7');
-                let border = gelecek ? '#e2e8f0' : (borc === 0 ? '#bbf7d0' : '#fecaca');
-                let etiket = gelecek
-                    ? `<span style="font-size:12px;color:#94a3b8;">Henüz gelmedi</span>`
-                    : borc === 0
-                        ? `<span style="font-size:12px;color:#16a34a;font-weight:700;">✅ Ödendi</span>`
-                        : `<span style="font-size:13px;color:#dc2626;font-weight:800;">${borc.toLocaleString('tr-TR')} TL borç</span>`;
-                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:${renk};border:1px solid ${border};">
-                    <span style="font-weight:600;color:#334155;">${ay}</span>${etiket}</div>`;
+                let bg  = gelecek ? '#f8fafc' : (borc===0 ? '#f0fdf4' : '#fff7f7');
+                let brd = gelecek ? '#e2e8f0' : (borc===0 ? '#bbf7d0' : '#fecaca');
+                let tag = gelecek ? `<span style="font-size:12px;color:#94a3b8;">Henüz gelmedi</span>`
+                    : borc===0  ? `<span style="font-size:12px;color:#16a34a;font-weight:700;">✅ Ödendi</span>`
+                    : `<span style="font-size:13px;color:#dc2626;font-weight:800;">${borc.toLocaleString('tr-TR')} TL borç</span>`;
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:${bg};border:1px solid ${brd};"><span style="font-weight:600;color:#334155;">${ay}</span>${tag}</div>`;
             }).join('');
-            document.getElementById('sakinAidatListesi').innerHTML = html;
-            document.getElementById('sakinToplamBorc').textContent = toplamBorc > 0
-                ? toplamBorc.toLocaleString('tr-TR', {minimumFractionDigits:2}) + ' TL'
-                : '✅ Borç yok';
+            return { html, toplamBorc, aylik };
+        }
 
-            // ── FİNANSAL ÖZET ────────────────────────────────────────────
-            let yilIslemleri = (veri.islemler || []).filter(i => i.yil === yil);
-            let toplamGelir  = yilIslemleri.filter(i => i.tur === 'Gelir').reduce((s, i) => s + i.tutar, 0);
-            let giderGruplari = {};
-            yilIslemleri.filter(i => i.tur === 'Gider').forEach(i => {
-                let tur = i.detay || 'Diğer';
-                giderGruplari[tur] = (giderGruplari[tur] || 0) + i.tutar;
-            });
-            let toplamGider = Object.values(giderGruplari).reduce((s, v) => s + v, 0);
-
-            let finansHtml = `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;">
-                    <span style="font-weight:700;color:#15803d;">📥 Toplam Aidat Geliri</span>
-                    <span style="font-weight:800;color:#15803d;font-size:15px;">${toplamGelir.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span>
-                </div>`;
-
-            if (Object.keys(giderGruplari).length > 0) {
-                finansHtml += `<div style="padding:2px 4px 4px;"><div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.05em;margin:8px 0 6px;">GİDERLER</div>`;
-                Object.entries(giderGruplari).sort((a,b) => b[1]-a[1]).forEach(([tur, tutar]) => {
-                    finansHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:8px;background:#fff7f7;border:1px solid #fecaca;margin-bottom:5px;">
-                        <span style="font-size:13px;font-weight:600;color:#7f1d1d;">📤 ${tur}</span>
-                        <span style="font-size:13px;font-weight:800;color:#dc2626;">${tutar.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span>
-                    </div>`;
+        /* ── SAYFA: FİNANSAL ÖZET ── */
+        function sakinFinansHtml() {
+            let { veri } = _sakinOturumu;
+            let yillar = veri.manuelYillar?.length ? [...veri.manuelYillar].sort((a,b)=>b-a) : [new Date().getFullYear()];
+            let yilSecOpt = yillar.map(y => `<option value="${y}">${y}</option>`).join('');
+            let icerik = sakinFinansIcerik(veri, yillar[0]);
+            return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                        <h2 style="margin:0;font-size:18px;color:#1e3a8a;">💰 Finansal Özet</h2>
+                        <select onchange="sakinFinansYilDegisti(this)" style="font-size:13px;font-weight:700;color:#1e40af;border:1.5px solid #bfdbfe;border-radius:8px;padding:6px 12px;background:#eff6ff;cursor:pointer;">${yilSecOpt}</select>
+                    </div>
+                    <div id="sakinFinansKap" style="max-width:480px;display:grid;gap:8px;">${icerik}</div>`;
+        }
+        function sakinFinansYilDegisti(sel) {
+            document.getElementById('sakinFinansKap').innerHTML = sakinFinansIcerik(_sakinOturumu.veri, parseInt(sel.value));
+        }
+        function sakinFinansIcerik(veri, yil) {
+            let yilIs = (veri.islemler || []).filter(i => i.yil === yil);
+            let toplamGelir = yilIs.filter(i => i.tur==='Gelir').reduce((s,i)=>s+i.tutar,0);
+            let grp = {};
+            yilIs.filter(i => i.tur==='Gider').forEach(i => { let t=i.detay||'Diğer'; grp[t]=(grp[t]||0)+i.tutar; });
+            let toplamGider = Object.values(grp).reduce((s,v)=>s+v,0);
+            let net = toplamGelir - toplamGider;
+            let h = `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;">
+                <span style="font-weight:700;color:#15803d;">📥 Toplam Aidat Geliri</span>
+                <span style="font-weight:800;color:#15803d;font-size:15px;">${toplamGelir.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span></div>`;
+            if (Object.keys(grp).length) {
+                h += `<div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.05em;padding:4px 2px;">GİDERLER</div>`;
+                Object.entries(grp).sort((a,b)=>b[1]-a[1]).forEach(([t,v]) => {
+                    h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:9px;background:#fff7f7;border:1px solid #fecaca;">
+                        <span style="font-size:13px;font-weight:600;color:#7f1d1d;">📤 ${t}</span>
+                        <span style="font-size:13px;font-weight:800;color:#dc2626;">${v.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span></div>`;
                 });
-                finansHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:#fef2f2;border:1.5px solid #fca5a5;margin-top:2px;">
+                h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:10px;background:#fef2f2;border:1.5px solid #fca5a5;">
                     <span style="font-weight:700;color:#991b1b;">Toplam Gider</span>
-                    <span style="font-weight:800;color:#991b1b;font-size:15px;">${toplamGider.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span>
-                </div></div>`;
+                    <span style="font-weight:800;color:#991b1b;font-size:15px;">${toplamGider.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span></div>`;
             } else {
-                finansHtml += `<div style="text-align:center;color:#94a3b8;font-size:13px;padding:10px;">${yil} yılına ait gider kaydı yok.</div>`;
+                h += `<div style="text-align:center;color:#94a3b8;padding:14px;">${yil} yılına ait gider kaydı yok.</div>`;
             }
+            h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:10px;background:${net>=0?'#eff6ff':'#fff7f7'};border:1.5px solid ${net>=0?'#bfdbfe':'#fca5a5'};">
+                <span style="font-weight:700;color:${net>=0?'#1e40af':'#991b1b'};">Net Bakiye</span>
+                <span style="font-weight:800;font-size:15px;color:${net>=0?'#1e40af':'#dc2626'};">${net>=0?'+':''}${net.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span></div>`;
+            return h;
+        }
 
-            let netDurum = toplamGelir - toplamGider;
-            finansHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:${netDurum>=0?'#eff6ff':'#fff7f7'};border:1.5px solid ${netDurum>=0?'#bfdbfe':'#fca5a5'};">
-                <span style="font-weight:700;color:${netDurum>=0?'#1e40af':'#991b1b'};">Net Bakiye</span>
-                <span style="font-weight:800;font-size:15px;color:${netDurum>=0?'#1e40af':'#dc2626'};">${netDurum>=0?'+':''}${netDurum.toLocaleString('tr-TR',{minimumFractionDigits:2})} TL</span>
-            </div>`;
-
-            document.getElementById('sakinFinansOzeti').innerHTML = finansHtml;
+        function sakinMenuToggle() {
+            let menu = document.getElementById('sakinSolMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
         }
 
         function sakinCikis() {
