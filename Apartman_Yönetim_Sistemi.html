@@ -1066,13 +1066,13 @@
                 <span class="menu-karti-baslik">👥 Sakin Bilgileri</span>
                 <span class="menu-karti-aciklama">Daire sakinlerinin telefon, e-posta ve iletişim kayıtlarını yönetin.</span>
             </button>
-            <button class="menu-karti menu-karti-finans" onclick="gelirGiderModalAc()">
+            <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('gelirGiderPaneli')">
                 <span class="menu-karti-baslik">➕ Gelir / Gider Ekle</span>
-                <span class="menu-karti-aciklama">Yeni gelir veya gider hareketi girin.</span>
+                <span class="menu-karti-aciklama">Yeni gelir veya gider hareketi girin, ekstre yükleyin, toplu ödeme ve ara dönem hesaplayın.</span>
             </button>
             <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('yoneticiPaneli')">
                 <span class="menu-karti-baslik">📘 İşletme Defteri</span>
-                <span class="menu-karti-aciklama">Tüm gelir ve gider hareketlerini görüntüleyin, yazdırın ve dışa aktarın.</span>
+                <span class="menu-karti-aciklama">Tüm gelir ve gider hareketlerini görüntüleyin, filtreleyin, yazdırın ve Excel'e aktarın.</span>
             </button>
             <button class="menu-karti menu-karti-finans" onclick="ekranDegistir('aidatTakibiPaneli')">
                 <span class="menu-karti-baslik">📅 Aidat Takibi</span>
@@ -1164,18 +1164,14 @@
 
     <div id="yoneticiPaneli" class="container hidden">
         <div class="panel-header no-print">
-            <h2>📘 İşletme Defteri</h2>
-            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
-        </div>
-        <div class="yil-paneli no-print">
-            <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:130px;"></select>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button onclick="gelirGiderModalAc()" class="btn-success" style="width:auto;">➕ Gelir / Gider Ekle</button>
-                <button onclick="document.getElementById('bankaEkstresiDosyasi').click()" class="btn-koyu-mavi" style="width:auto;">TEB Ekstre Yükle</button>
-                <button onclick="topluOdemeModalAc()" class="btn-success" style="width:auto;">💰 Toplu Ödeme</button>
-                <button onclick="araDonemiModalAc()" class="btn-success" style="width:auto;">📅 Ara Dönem</button>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <h2 style="margin:0;">📘 İşletme Defteri</h2>
+                <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:120px;"></select>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button onclick="window.print()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
                 <button onclick="exceleAktar()" class="btn-koyu-mavi" style="width:auto;">📊 Excel</button>
+                <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
             </div>
         </div>
         <input type="file" id="bankaEkstresiDosyasi" accept=".xls,.xlsx,.xlsm,.htm,.html" style="display:none;" onchange="bankaEkstresiSecildi(event)">
@@ -1199,6 +1195,35 @@
             <div style="flex:1;" id="gelirSayfaKontrol" class="sayfa-kontrol"></div>
         </div>
         <div class="bakiye-kutusu" id="bakiyeYazisi">KASA: 0 TL</div>
+    </div>
+
+    <div id="gelirGiderPaneli" class="container hidden">
+        <div class="panel-header no-print">
+            <h2>➕ Gelir / Gider Ekle</h2>
+            <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
+        </div>
+        <div class="kart" style="max-width:700px;">
+            <div class="row">
+                <div class="col" style="min-width:120px;"><label>Tarih:</label><input type="date" id="islemTarihiInput"></div>
+                <div class="col" style="min-width:80px;"><label>Tür:</label><select id="islemTuru" onchange="formuDuzenle()"><option value="Gelir">Gelir</option><option value="Gider">Gider</option></select></div>
+                <div class="col" id="daireKutusu"><label>Bölüm:</label><select id="ilgiliDaire"></select></div>
+                <div class="col" id="ayKutusu"><label>Kalem:</label><select id="ilgiliAySecimi"></select></div>
+                <div class="col hidden" id="giderTuruKutusu"><label>Gider Türü:</label><select id="giderTuruSecimi"></select></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>Tutar (TL):</label><input type="number" id="islemTutari" min="0" placeholder="0"></div>
+                <div class="col"><label>Açıklama:</label><input type="text" id="islemAciklamasi" placeholder="İsteğe bağlı"></div>
+                <div class="col"><label>&nbsp;</label><button class="btn-success" onclick="islemEkle()">➕ Kaydet</button></div>
+            </div>
+        </div>
+        <div class="kart" style="max-width:700px;margin-top:16px;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="document.getElementById('bankaEkstresiDosyasiGG').click()" class="btn-koyu-mavi" style="width:auto;">🏦 TEB Ekstre Yükle</button>
+                <button onclick="topluOdemeModalAc()" class="btn-success" style="width:auto;">💰 Toplu Ödeme</button>
+                <button onclick="araDonemiModalAc()" class="btn-success" style="width:auto;">📅 Ara Dönem</button>
+            </div>
+            <input type="file" id="bankaEkstresiDosyasiGG" accept=".xls,.xlsx,.xlsm,.htm,.html" style="display:none;" onchange="bankaEkstresiSecildi(event)">
+        </div>
     </div>
 
     <div id="aidatTakibiPaneli" class="container hidden">
@@ -2005,11 +2030,19 @@
 
         function ekranDegistir(id) {
             modalKapat('modalGelirGider');
-            const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','kullaniciYonetimPaneli','yoneticiPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
+            const paneller = ['anaMenuPaneli','apartmanDetayPaneli','sakinBilgileriPaneli','kullaniciYonetimPaneli','yoneticiPaneli','gelirGiderPaneli','aidatTakibiPaneli','aidatAyarlariPaneli','ekButcePaneli'];
             paneller.forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             if(id==='kullaniciYonetimPaneli') kullaniciYonetimPaneliniHazirla();
             if(id==='yoneticiPaneli') tablolariGuncelle();
+            if(id==='gelirGiderPaneli') {
+                let bugun = new Date().toISOString().split('T')[0];
+                document.getElementById('islemTarihiInput').value = bugun;
+                document.getElementById('islemTuru').value = 'Gelir';
+                document.getElementById('islemTutari').value = '';
+                document.getElementById('islemAciklamasi').value = '';
+                formuDuzenle();
+            }
             if(id==='aidatTakibiPaneli') aidatMatrisiniCiz();
             if(id==='aidatAyarlariPaneli') aidatAyarlariniEkranaGetir();
             if(id==='sakinBilgileriPaneli') sakinTablosunuDoldur();
@@ -2358,7 +2391,6 @@
             tablolariGuncelle();
             document.getElementById('islemTutari').value = "";
             document.getElementById('islemAciklamasi').value = "";
-            modalKapat('modalGelirGider');
             toastGoster('İşlem eklendi ✓', 'basari');
             bulutaKaydetKuyrukla(true);
         }
