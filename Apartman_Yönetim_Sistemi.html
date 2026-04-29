@@ -1854,7 +1854,68 @@
             kullaniciYonetimPaneliniHazirla();
             toastGoster('Kullanıcı kaydedildi.', 'basari');
             bulutaKaydetKuyrukla(true);
+            if (!duzenleId && sifre) {
+                kullaniciBilgisiGonderSor(adSoyad, telefon, daire, sifre);
+            }
         }
+
+        // ── KULLANICI BİLGİSİ GÖNDERİM ──────────────────────────────────
+        let _bekleyenKullaniciBilgisi = null;
+
+        function kullaniciBilgisiGonderSor(adSoyad, telefon, daire, sifre) {
+            let aptAd = aptBilgi.ad || 'Apartman';
+            let url   = window.location.href.split('?')[0];
+            _bekleyenKullaniciBilgisi = {
+                telefon,
+                mesaj: `Sayın ${adSoyad},\n\n${aptAd} - ${daire} apartman yönetim sistemine erişim bilgileriniz:\n\n🔗 Giriş: ${url}\n👤 Kullanıcı Adı: ${telefon}\n🔑 Şifre: ${sifre}\n\nSaygılarımızla,\nApartman Yönetimi`
+            };
+            document.getElementById('onayIkon').textContent    = '📲';
+            document.getElementById('onayBaslik').textContent  = 'Giriş Bilgilerini Gönder';
+            document.getElementById('onayMesaj').textContent   = `"${adSoyad}" için kullanıcı adı ve şifre gönderilsin mi?`;
+            let butonlar = document.getElementById('onayButonlar');
+            butonlar.innerHTML = `
+                <button class="btn-geri" style="width:auto;padding:10px 16px;" onclick="modalKapat('modalOnay')">Atla</button>
+                <button style="background:#1e40af;color:white;width:auto;padding:10px 16px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;" onclick="modalKapat('modalOnay');kullaniciBilgisiSmsGonder()">📱 SMS ile Gönder</button>
+                <button style="background:#25D366;color:white;width:auto;padding:10px 16px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;" onclick="modalKapat('modalOnay');kullaniciBilgisiWhatsapp()">📲 WhatsApp ile Gönder</button>
+            `;
+            modalAc('modalOnay');
+        }
+
+        function kullaniciBilgisiWhatsapp() {
+            if (!_bekleyenKullaniciBilgisi) return;
+            let { telefon, mesaj } = _bekleyenKullaniciBilgisi;
+            _bekleyenKullaniciBilgisi = null;
+            let temizTel = telTemizle(telefon);
+            window.open(`https://wa.me/${temizTel}?text=${encodeURIComponent(mesaj)}`, '_blank');
+        }
+
+        async function kullaniciBilgisiSmsGonder() {
+            if (!_bekleyenKullaniciBilgisi) return;
+            let { telefon, mesaj } = _bekleyenKullaniciBilgisi;
+            _bekleyenKullaniciBilgisi = null;
+            let apiId  = localStorage.getItem(SMS_API_ID_KEY);
+            let apiKey = localStorage.getItem(SMS_API_KEY_KEY);
+            if (!apiId || !apiKey) {
+                toastGoster('SMS göndermek için önce SMS ayarlarından API bilgilerini kaydedin.', 'hata');
+                return;
+            }
+            // API elementlerini (modal kapalı olsa da DOM'da bulunur) güncelle
+            document.getElementById('smsApiId').value  = apiId;
+            document.getElementById('smsApiKey').value = apiKey;
+            document.getElementById('smsSender').value = localStorage.getItem(SMS_SENDER_KEY) || 'BILGI';
+            let temizTel = smsTelTemizle(telefon);
+            toastGoster('SMS gönderiliyor...', 'bilgi');
+            let sonuc = await smsGonderApiIsteği([temizTel], [mesaj], null);
+            if (!sonuc) return;
+            if (sonuc.error) {
+                toastGoster('SMS gönderilemedi: ' + sonuc.error, 'hata');
+            } else if (sonuc.status === true || sonuc.status === 'success' || sonuc.code === 200 || (sonuc.data && sonuc.data.status)) {
+                toastGoster('✅ Giriş bilgileri SMS ile gönderildi.', 'basari');
+            } else {
+                toastGoster('SMS durumu bilinmiyor, lütfen kontrol edin.', 'bilgi');
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         function kullaniciSil(id) {
             let kayit = kullaniciKayitlari.find(k => k.id === id);
