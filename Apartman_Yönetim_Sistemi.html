@@ -722,6 +722,7 @@
                     <div id="sakinAd" style="font-size:14px;font-weight:700;color:white;">---</div>
                     <div id="sakinDaireAd" style="font-size:11px;opacity:.75;color:white;">---</div>
                 </div>
+                <button id="sakinYenileBtn" onclick="sakinVeriYenile()" title="Verileri yenile" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">🔄</button>
                 <button onclick="sakinCikis()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Çıkış</button>
             </div>
         </div>
@@ -1876,12 +1877,37 @@
             if (!kayit) return false;
             try {
                 _sakinOturumu = JSON.parse(kayit);
+                // Oturum var — arka planda taze veri çek
+                sakinTazeVeriCek();
                 sakinPaneliniGoster();
                 return true;
             } catch (e) {
                 sessionStorage.removeItem('sakinOturumu');
                 return false;
             }
+        }
+
+        async function sakinTazeVeriCek() {
+            if (!_supabase || !_sakinOturumu) return;
+            try {
+                let { data } = await _supabase.from('shared_data').select('payload').eq('id', 1).maybeSingle();
+                if (!data?.payload) return;
+                // Kullanıcı hesabı hâlâ geçerli mi?
+                let hesap = (data.payload.kullaniciKayitlari || []).find(k => k.telefon === _sakinOturumu.hesap.telefon);
+                if (!hesap) return; // hesap silinmişse dokunma
+                _sakinOturumu.hesap = hesap;
+                _sakinOturumu.veri  = data.payload;
+                sessionStorage.setItem('sakinOturumu', JSON.stringify(_sakinOturumu));
+                // Aktif sayfayı sessizce yenile
+                sakinSayfaAc(_sakinAktifSayfa);
+            } catch (e) { /* ağ hatası — eski veriyle devam */ }
+        }
+
+        async function sakinVeriYenile() {
+            let btn = document.getElementById('sakinYenileBtn');
+            if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+            await sakinTazeVeriCek();
+            if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
         }
         // ─────────────────────────────────────────────────────────────────
 
