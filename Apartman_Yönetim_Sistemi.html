@@ -33,9 +33,7 @@
         body {
             font-family: 'Inter', Arial, sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(59,130,246,.10), transparent 24%),
-                radial-gradient(circle at top right, rgba(22,163,74,.08), transparent 22%),
-                linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+                linear-gradient(180deg, #f7fafc 0%, #eef2f7 100%);
             margin: 0; padding: 24px 20px;
             color: var(--metin);
             font-size: 14px;
@@ -48,8 +46,7 @@
             box-shadow: var(--golge);
             max-width: 1240px;
             margin: auto;
-            border: 1px solid rgba(226,232,240,.95);
-            backdrop-filter: blur(6px);
+            border: 1px solid #e5e7eb;
         }
         .hidden { display: none !important; }
 
@@ -147,32 +144,32 @@
 
         .menu-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 24px; }
         .menu-karti {
-            background: linear-gradient(145deg, #2563eb, #1d4ed8);
-            color: white;
+            background: #ffffff;
+            color: #0f172a;
             padding: 22px 20px 20px;
             border-radius: 18px;
             text-align: left;
             width: 230px;
             min-height: 148px;
-            box-shadow: 0 12px 28px rgba(30,64,175,.18);
+            box-shadow: 0 10px 24px rgba(15,23,42,.08);
             transition: transform .2s, box-shadow .2s, filter .2s;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,.18);
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #cbd5e1;
         }
         .menu-karti::before {
             content: "";
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at top right, rgba(255,255,255,.22), transparent 30%),
-                linear-gradient(180deg, rgba(255,255,255,.08), transparent 60%);
+                linear-gradient(180deg, rgba(248,250,252,.95), rgba(255,255,255,.75));
             pointer-events: none;
         }
-        .menu-karti:hover { transform: translateY(-6px); box-shadow: 0 18px 34px rgba(30,64,175,.24); filter: saturate(1.05); }
+        .menu-karti:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(15,23,42,.12); }
         .menu-karti-baslik {
             display: block;
             font-size: 17px;
@@ -181,26 +178,22 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            color: #0f172a;
         }
         .menu-karti-aciklama {
             display: block;
             font-size: 13px;
             line-height: 1.5;
-            color: rgba(255,255,255,.88);
+            color: #475569;
             font-weight: 500;
             position: relative;
             z-index: 1;
         }
-        .menu-karti-finans { background: linear-gradient(145deg, #1d4ed8, #1e3a8a); }
-        .menu-karti-finans:hover { box-shadow: 0 18px 34px rgba(30,64,175,.24); }
-        .menu-karti-sakin { background: linear-gradient(145deg, #0f766e, #115e59); }
-        .menu-karti-sakin:hover { box-shadow: 0 18px 34px rgba(15,118,110,.24); }
-        .menu-karti-ayar { background: linear-gradient(145deg, #b45309, #92400e); }
-        .menu-karti-ayar:hover { box-shadow: 0 18px 34px rgba(180,83,9,.24); }
-        .menu-karti-ozel { background: linear-gradient(145deg, #7c3aed, #5b21b6); }
-        .menu-karti-ozel:hover { box-shadow: 0 18px 34px rgba(124,58,237,.24); }
-        .menu-karti-bilgi { background: linear-gradient(145deg, #0284c7, #075985); }
-        .menu-karti-bilgi:hover { box-shadow: 0 18px 34px rgba(2,132,199,.24); }
+        .menu-karti-finans { border-left-color: #2563eb; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); }
+        .menu-karti-sakin { border-left-color: #0f766e; background: linear-gradient(180deg, #ffffff 0%, #f6fbfa 100%); }
+        .menu-karti-ayar { border-left-color: #b45309; background: linear-gradient(180deg, #ffffff 0%, #fffaf5 100%); }
+        .menu-karti-ozel { border-left-color: #7c3aed; background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%); }
+        .menu-karti-bilgi { border-left-color: #0284c7; background: linear-gradient(180deg, #ffffff 0%, #f5fbff 100%); }
 
         /* ── TABLOLAR ────────────────────────────────────────────────── */
         .matris-tablo { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12.5px; text-align: center; }
