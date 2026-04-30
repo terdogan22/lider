@@ -487,28 +487,11 @@
             display: flex; align-items: center; justify-content: space-between;
         }
         .sms-modal-baslik h3 { margin: 0; color: #1e3a8a; font-size: 16px; font-weight: 700; }
-        .sms-api-toggle-btn {
-            background: #dbeafe; color: #1e40af; border: 1.5px solid #93c5fd;
-            border-radius: 7px; padding: 6px 13px; font-size: 12.5px; font-weight: 700;
-            cursor: pointer; width: auto; transition: background .15s;
-        }
-        .sms-api-toggle-btn:hover { background: #bfdbfe; }
-        .sms-api-toggle-btn.aktif { background: #1e40af; color: white; border-color: #1e40af; }
         .sms-modal-kapat-btn {
             background: none; border: none; font-size: 20px; cursor: pointer;
             color: #888; padding: 0; width: auto; line-height: 1;
         }
         .sms-modal-kapat-btn:hover { color: #333; }
-        .sms-api-alani {
-            padding: 14px 20px 12px; background: #f0f7ff;
-            border-bottom: 1.5px solid #bfdbfe; flex-shrink: 0;
-            animation: smsSlideDown .18s ease;
-        }
-        @keyframes smsSlideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-        .sms-api-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .sms-api-row .col { flex:1; min-width: 160px; }
-        .sms-api-row .col label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 3px; display: block; text-transform: uppercase; letter-spacing: .04em; }
-        .sms-api-row input { margin: 0; font-size: 13px; }
         .sms-sablon-alani { padding: 12px 20px 10px; background: #f8f9fa; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
         .sms-sablon-alani > label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .04em; }
         .sms-mesaj-alani {
@@ -965,6 +948,26 @@
         </div>
     </div>
 
+    <!-- SMS API AYARLARI MODALİ -->
+    <div id="modalSmsApi" class="modal-arkaplan hidden no-print">
+        <div class="modal-kutu" style="max-width:560px;">
+            <h3>📱 SMS API Ayarları (VatanSMS)</h3>
+            <p style="font-size:13px; color:#555; margin:0 0 14px;">VatanSMS hesap bilgilerinizi girin. Bilgiler tarayıcınızda saklanır ve hem aidat borç bildirimi hem de kullanıcı bilgisi SMS'lerinde kullanılır.</p>
+            <label>API ID:</label>
+            <input type="text" id="smsApiId" placeholder="VatanSMS API ID" autocomplete="off">
+            <label>API KEY:</label>
+            <input type="password" id="smsApiKey" placeholder="VatanSMS API Key" autocomplete="off">
+            <label>Gönderici Adı:</label>
+            <input type="text" id="smsSender" placeholder="APTMAN" maxlength="11" autocomplete="off">
+            <div style="margin-top:10px; font-size:12px; color:#16a34a; font-weight:600; min-height:18px;" id="smsApiKayitDurumu"></div>
+            <div class="modal-butonlar">
+                <button class="btn-danger" style="width:32%;" onclick="smsApiBilgileriniSil()">🗑️ Sil</button>
+                <button class="btn-geri" style="width:32%;" onclick="modalKapat('modalSmsApi')">✕ Kapat</button>
+                <button class="btn-success" style="width:32%;" onclick="smsApiBilgileriniKaydet()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SMS BİLDİRİM MODALİ -->
     <div id="modalSms" class="modal-arkaplan hidden no-print">
         <div class="sms-modal-kutu">
@@ -972,20 +975,7 @@
             <div class="sms-modal-baslik">
                 <h3>📱 VatanSMS — Borç Bildirimi</h3>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button class="sms-api-toggle-btn" id="smsApiToggleBtn" onclick="smsApiToggle()" title="API Ayarları">⚙️ API Ayarları</button>
                     <button class="sms-modal-kapat-btn" onclick="modalKapat('modalSms')" title="Kapat">✕</button>
-                </div>
-            </div>
-            <!-- API Bilgileri (gizlenebilir) -->
-            <div class="sms-api-alani" id="smsApiAlani" style="display:none;">
-                <div class="sms-api-row">
-                    <div class="col"><label>API ID:</label><input type="text" id="smsApiId" placeholder="VatanSMS API ID" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
-                    <div class="col"><label>API KEY:</label><input type="password" id="smsApiKey" placeholder="VatanSMS API Key" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
-                    <div class="col"><label>Gönderici Adı:</label><input type="text" id="smsSender" placeholder="APTMAN" maxlength="11" autocomplete="off" onblur="smsApiBilgileriniKaydet()"></div>
-                </div>
-                <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
-                    <span id="smsApiKayitDurumu" style="font-size:11px; color:#16a34a; font-weight:600;"></span>
-                    <button onclick="smsApiBilgileriniSil()" style="font-size:11px; color:#ef4444; background:none; border:none; cursor:pointer; padding:2px 6px; text-decoration:underline; font-weight:600;" title="Kayıtlı API bilgilerini sil">Bilgileri Sil</button>
                 </div>
             </div>
             <!-- Mesaj Şablonu -->
@@ -1121,6 +1111,7 @@
         <div class="panel-header no-print">
             <h2>🔐 Yönetici Paneli</h2>
             <div class="btn-grup">
+                <button onclick="smsApiAyarModalAc()" class="btn-koyu-mavi" style="width:auto;">📱 SMS API Ayarları</button>
                 <button onclick="sistemiSifirla()" class="btn-danger" style="width:auto;">🗑️ Verileri Sil</button>
                 <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
             </div>
@@ -2248,13 +2239,9 @@
             let apiId  = localStorage.getItem(SMS_API_ID_KEY);
             let apiKey = localStorage.getItem(SMS_API_KEY_KEY);
             if (!apiId || !apiKey) {
-                toastGoster('SMS göndermek için önce SMS ayarlarından API bilgilerini kaydedin.', 'hata');
+                bildir({ baslik: 'SMS API Ayarları Eksik', mesaj: 'SMS göndermek için Yönetici Paneli > 📱 SMS API Ayarları menüsünden VatanSMS bilgilerinizi kaydedin.', ikon: '🔑', kapatMetin: 'Tamam' });
                 return;
             }
-            // API elementlerini (modal kapalı olsa da DOM'da bulunur) güncelle
-            document.getElementById('smsApiId').value  = apiId;
-            document.getElementById('smsApiKey').value = apiKey;
-            document.getElementById('smsSender').value = localStorage.getItem(SMS_SENDER_KEY) || 'BILGI';
             let temizTel = smsTelTemizle(telefon);
             toastGoster('SMS gönderiliyor...', 'bilgi');
             let sonuc = await smsGonderApiIsteği([temizTel], [mesaj], null);
@@ -3319,35 +3306,29 @@
         // ───────────────────────────────────────────────────────────────
         // ── SMS BİLDİRİM (VatanSMS) ───────────────────────────────────
         const SMS_SABLON_VARSAYILAN = 'Sayin {AD}, {APARTMAN} icin {AYLAR} aylarına ait toplam {BORC} tutarında borcunuz bulunmaktadır. Bilgilerinize saygılarımızla.';
-        function smsApiToggle() {
-            let alani = document.getElementById('smsApiAlani');
-            let btn   = document.getElementById('smsApiToggleBtn');
-            let acik  = alani.style.display !== 'none';
-            alani.style.display = acik ? 'none' : 'block';
-            btn.classList.toggle('aktif', !acik);
-            btn.textContent = acik ? '⚙️ API Ayarları' : '✕ Kapat';
+
+        function smsApiAyarModalAc() {
+            // localStorage'daki kayıtlı bilgileri yükle
+            document.getElementById('smsApiId').value  = localStorage.getItem(SMS_API_ID_KEY)  || '';
+            document.getElementById('smsApiKey').value = localStorage.getItem(SMS_API_KEY_KEY) || '';
+            document.getElementById('smsSender').value = localStorage.getItem(SMS_SENDER_KEY)  || '';
+            let durumEl = document.getElementById('smsApiKayitDurumu');
+            if (durumEl) durumEl.textContent = localStorage.getItem(SMS_API_ID_KEY) ? '✅ Kayıtlı API bilgileri yüklendi.' : '';
+            modalAc('modalSmsApi');
         }
 
         function smsModalAc() {
-            // API bilgilerini hatırlıyorsa doldur
-            let kaydedilmisId     = localStorage.getItem(SMS_API_ID_KEY) || '';
-            let kaydedilmisKey    = localStorage.getItem(SMS_API_KEY_KEY) || '';
-            let kaydedilmisSender = localStorage.getItem(SMS_SENDER_KEY) || '';
-            document.getElementById('smsApiId').value     = kaydedilmisId;
-            document.getElementById('smsApiKey').value    = kaydedilmisKey;
-            document.getElementById('smsSender').value    = kaydedilmisSender;
-
-            // API kayıtlı değilse otomatik aç, kayıtlıysa gizli başlat
-            let alani = document.getElementById('smsApiAlani');
-            let btn   = document.getElementById('smsApiToggleBtn');
-            let apiKayitli = kaydedilmisId !== '';
-            alani.style.display = apiKayitli ? 'none' : 'block';
-            btn.classList.toggle('aktif', !apiKayitli);
-            btn.textContent = apiKayitli ? '⚙️ API Ayarları' : '✕ Kapat';
-
-            // Durum etiketi
-            let durumEl = document.getElementById('smsApiKayitDurumu');
-            if (durumEl) durumEl.textContent = apiKayitli ? '✅ Kayıtlı' : '';
+            // API kayıtlı mı kontrol et
+            let apiId = localStorage.getItem(SMS_API_ID_KEY);
+            if (!apiId) {
+                bildir({
+                    baslik: 'SMS API Ayarları Eksik',
+                    mesaj: 'SMS göndermek için önce Yönetici Paneli > 📱 SMS API Ayarları menüsünden VatanSMS bilgilerinizi kaydedin.',
+                    ikon: '🔑',
+                    kapatMetin: 'Tamam'
+                });
+                return;
+            }
 
             // Şablon
             let kaydedilmisSablon = localStorage.getItem('vatanSmsSablon') || SMS_SABLON_VARSAYILAN;
@@ -3359,24 +3340,46 @@
         }
 
         function smsApiBilgileriniSil() {
-            localStorage.removeItem(SMS_API_ID_KEY);
-            localStorage.removeItem(SMS_API_KEY_KEY);
-            localStorage.removeItem(SMS_SENDER_KEY);
-            document.getElementById('smsApiId').value  = '';
-            document.getElementById('smsApiKey').value = '';
-            document.getElementById('smsSender').value = '';
-            let durumEl = document.getElementById('smsApiKayitDurumu');
-            if (durumEl) durumEl.textContent = '';
-            toastGoster('API bilgileri temizlendi.', 'bilgi');
+            onayla({
+                baslik: 'API Bilgileri Silinsin mi?',
+                mesaj: 'Kayıtlı VatanSMS API bilgileri tarayıcıdan kaldırılacak. SMS gönderebilmek için tekrar girmeniz gerekecek.',
+                ikon: '🗑️',
+                onayMetin: 'Evet, Sil',
+                iptalMetin: 'Vazgeç',
+                onayRenk: '#dc3545'
+            }, () => {
+                localStorage.removeItem(SMS_API_ID_KEY);
+                localStorage.removeItem(SMS_API_KEY_KEY);
+                localStorage.removeItem(SMS_SENDER_KEY);
+                let idEl  = document.getElementById('smsApiId');
+                let keyEl = document.getElementById('smsApiKey');
+                let sndEl = document.getElementById('smsSender');
+                if (idEl)  idEl.value  = '';
+                if (keyEl) keyEl.value = '';
+                if (sndEl) sndEl.value = '';
+                let durumEl = document.getElementById('smsApiKayitDurumu');
+                if (durumEl) { durumEl.style.color = '#ef4444'; durumEl.textContent = '🗑️ API bilgileri silindi.'; }
+                toastGoster('API bilgileri temizlendi.', 'bilgi');
+                bulutaKaydetKuyrukla(true);
+            });
         }
 
         function smsApiBilgileriniKaydet() {
             let apiId  = document.getElementById('smsApiId').value.trim();
             let apiKey = document.getElementById('smsApiKey').value.trim();
             let sender = document.getElementById('smsSender').value.trim();
-            if (apiId)  localStorage.setItem(SMS_API_ID_KEY,  apiId);
-            if (apiKey) localStorage.setItem(SMS_API_KEY_KEY, apiKey);
-            if (sender) localStorage.setItem(SMS_SENDER_KEY,  sender);
+            if (!apiId || !apiKey) {
+                bildir({ baslik: 'Eksik Bilgi', mesaj: 'API ID ve API Key alanları zorunludur.', ikon: '⚠️', kapatMetin: 'Tamam' });
+                return;
+            }
+            localStorage.setItem(SMS_API_ID_KEY,  apiId);
+            localStorage.setItem(SMS_API_KEY_KEY, apiKey);
+            if (sender) localStorage.setItem(SMS_SENDER_KEY, sender);
+            else        localStorage.removeItem(SMS_SENDER_KEY);
+            let durumEl = document.getElementById('smsApiKayitDurumu');
+            if (durumEl) { durumEl.style.color = '#16a34a'; durumEl.textContent = '✅ API bilgileri kaydedildi.'; }
+            toastGoster('SMS API bilgileri kaydedildi.', 'basari');
+            bulutaKaydetKuyrukla(true);
         }
 
         function smsKarakterSay() {
@@ -3514,12 +3517,12 @@
         }
 
         async function smsGonderApiIsteği(telefonlar, mesajlar, tekMesaj) {
-            let apiId   = document.getElementById('smsApiId').value.trim();
-            let apiKey  = document.getElementById('smsApiKey').value.trim();
-            let sender  = document.getElementById('smsSender').value.trim() || 'BILGI';
+            let apiId   = (localStorage.getItem(SMS_API_ID_KEY)  || '').trim();
+            let apiKey  = (localStorage.getItem(SMS_API_KEY_KEY) || '').trim();
+            let sender  = (localStorage.getItem(SMS_SENDER_KEY)  || '').trim() || 'BILGI';
 
             if (!apiId || !apiKey) {
-                toastGoster('API ID ve API Key girilmesi zorunludur!', 'hata');
+                toastGoster('SMS göndermek için Yönetici Paneli > 📱 SMS API Ayarları menüsünden API bilgilerini girin.', 'hata');
                 return null;
             }
             if (!sender) {
@@ -3608,10 +3611,10 @@
                 return;
             }
 
-            let apiId  = document.getElementById('smsApiId').value.trim();
-            let apiKey = document.getElementById('smsApiKey').value.trim();
+            let apiId  = (localStorage.getItem(SMS_API_ID_KEY)  || '').trim();
+            let apiKey = (localStorage.getItem(SMS_API_KEY_KEY) || '').trim();
             if (!apiId || !apiKey) {
-                bildir({ baslik: 'API Bilgisi Eksik', mesaj: 'Lütfen VatanSMS API ID ve API Key bilgilerini girin.', ikon: '🔑', kapatMetin: 'Tamam' });
+                bildir({ baslik: 'API Bilgisi Eksik', mesaj: 'Yönetici Paneli > 📱 SMS API Ayarları menüsünden VatanSMS API ID ve API Key bilgilerini girin.', ikon: '🔑', kapatMetin: 'Tamam' });
                 return;
             }
 
