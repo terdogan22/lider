@@ -1136,7 +1136,7 @@
                 <select id="yilSecimiDefter" onchange="tablolariGuncelle()" style="width:120px;"></select>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button onclick="window.print()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
+                <button onclick="defterYazdir()" class="btn-koyu-mavi" style="width:auto;">📄 Yazdır</button>
                 <button onclick="exceleAktar()" class="btn-koyu-mavi" style="width:auto;">📊 Excel</button>
                 <button onclick="ekranDegistir('anaMenuPaneli')" class="btn-geri" style="width:auto;">⬅ Ana Menü</button>
             </div>
@@ -2645,6 +2645,53 @@
             document.getElementById('bakiyeYazisi').innerText = `DEVREDEN: ${paraBiçim(dev)} | KASA: ${paraBiçim(dev + tGel - tGid)}`;
             sayfaKontrolGuncelle('gelirSayfaKontrol', gelirSayfa, gelMax, gelirler.length, 'gelir');
             sayfaKontrolGuncelle('giderSayfaKontrol', giderSayfa, gidMax, giderler.length, 'gider');
+        }
+
+        function defterYazdir() {
+            let yil = parseInt(document.getElementById('yilSecimiDefter').value);
+            let arama = (document.getElementById('defterArama')?.value || '').toLowerCase().trim();
+            let yilIslemleri = islemler.map((is, idx) => ({...is, origIdx: idx}))
+                .filter(is => is.yil === yil)
+                .sort((a, b) => tarihSirala(a.tarih) - tarihSirala(b.tarih));
+            let filtreli = arama ? yilIslemleri.filter(is =>
+                (is.detay||'').toLowerCase().includes(arama) ||
+                (is.aciklama||'').toLowerCase().includes(arama) ||
+                (is.ay||'').toLowerCase().includes(arama)
+            ) : yilIslemleri;
+
+            let gelirler = filtreli.filter(is => is.tur === 'Gelir');
+            let giderler = filtreli.filter(is => is.tur === 'Gider');
+            let tGel = gelirler.reduce((s,x) => s + x.tutar, 0);
+            let tGid = giderler.reduce((s,x) => s + x.tutar, 0);
+
+            // Mevcut içeriği sakla
+            let eskiGel = document.getElementById('gelirlerTablosu').innerHTML;
+            let eskiGid = document.getElementById('giderlerTablosu').innerHTML;
+
+            // Tüm kayıtları render et
+            let gelHtml = '', gidHtml = '';
+            gelirler.forEach((is, i) => {
+                gelHtml += `<tr><td>${i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td></tr>`;
+            });
+            giderler.forEach((is, i) => {
+                gidHtml += `<tr><td>${i+1}</td><td>${is.tarih}</td><td>${is.detay}</td><td>${is.aciklama}</td><td>${paraBiçim(is.tutar)}</td></tr>`;
+            });
+            if(gelirler.length > 0) gelHtml += `<tr style="background-color:#d4edda;font-weight:bold;"><td colspan="4" style="text-align:right;padding-right:10px;">TOPLAM (${gelirler.length} kayıt)</td><td>${paraBiçim(tGel)}</td></tr>`;
+            if(giderler.length > 0) gidHtml += `<tr style="background-color:#f8d7da;font-weight:bold;"><td colspan="4" style="text-align:right;padding-right:10px;">TOPLAM (${giderler.length} kayıt)</td><td>${paraBiçim(tGid)}</td></tr>`;
+
+            document.getElementById('gelirlerTablosu').innerHTML = gelHtml;
+            document.getElementById('giderlerTablosu').innerHTML = gidHtml;
+
+            // Sayfalama kontrollerini gizle
+            let sayfaKontrols = document.querySelectorAll('.sayfa-kontrol');
+            sayfaKontrols.forEach(el => el.classList.add('no-print'));
+
+            window.print();
+
+            // Eski içeriği geri yükle
+            document.getElementById('gelirlerTablosu').innerHTML = eskiGel;
+            document.getElementById('giderlerTablosu').innerHTML = eskiGid;
+            sayfaKontrols.forEach(el => el.classList.remove('no-print'));
         }
 
         function islemSil(i) {
